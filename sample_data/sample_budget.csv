@@ -1,0 +1,6 @@
+Work package,Cost (USD),Notes
+Discovery and data profiling,28000,4 weeks
+Data pipelines,96000,"AWS Glue, 3 source systems"
+Data model and reporting,74000,Redshift + dashboards
+Training and rollout,30000,6 sessions
+Contingency,20000,~8%

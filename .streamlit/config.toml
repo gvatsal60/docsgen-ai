@@ -1,0 +1,17 @@
+[server]
+maxUploadSize = 50          # MB; DocsGen enforces its own (configurable) per-file limit as well
+enableXsrfProtection = true
+enableCORS = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+
+[theme]
+primaryColor = "#124E8C"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F5FA"
+textColor = "#1F2937"
+font = "sans serif"

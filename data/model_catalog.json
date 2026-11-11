@@ -1,0 +1,51 @@
+{
+  "_comment": "Suggested model identifiers shown when live model discovery is unavailable. This is the only place model names are listed; edit freely. Any model name can also be typed manually in the UI.",
+  "anthropic": [
+    "claude-sonnet-4-5",
+    "claude-opus-4-1",
+    "claude-3-5-haiku-latest"
+  ],
+  "bedrock": [
+    "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "us.amazon.nova-pro-v1:0",
+    "us.meta.llama3-3-70b-instruct-v1:0"
+  ],
+  "gemini": [
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-2.0-flash"
+  ],
+  "litellm": [
+    "openai/gpt-4o-mini",
+    "anthropic/claude-3-5-haiku-latest",
+    "groq/llama-3.3-70b-versatile",
+    "azure/<your-deployment>"
+  ],
+  "llamaapi": [
+    "Llama-4-Maverick-17B-128E-Instruct-FP8",
+    "Llama-3.3-70B-Instruct"
+  ],
+  "llamacpp": [
+    "default"
+  ],
+  "mistral": [
+    "mistral-large-latest",
+    "mistral-small-latest"
+  ],
+  "ollama": [
+    "llama3.1",
+    "qwen2.5",
+    "mistral"
+  ],
+  "openai": [
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "o4-mini"
+  ],
+  "writer": [
+    "palmyra-x5",
+    "palmyra-x4"
+  ]
+}

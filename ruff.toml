@@ -1,0 +1,21 @@
+# Ruff settings for DocsGen, aligned with the repo's isort and flake8 configuration.
+line-length = 88
+target-version = "py311"
+
+[lint.isort]
+known-first-party = [
+    "agents",
+    "config",
+    "document_engine",
+    "models",
+    "services",
+    "storage",
+    "testkit",
+    "tests",
+    "tools",
+    "ui",
+]
+
+[lint]
+# flake8 owns line length; keep its "# noqa: E501" markers.
+external = ["E501"]
