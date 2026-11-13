@@ -25,7 +25,8 @@ def _normalize_number(value: str) -> str:
 
 
 def _source_numbers(ctx: DocumentContext, extra_text: str = "") -> set[str]:
-    corpus = "\n".join(d.text for d in ctx.sources.values()) + "\n" + extra_text
+    corpus = "\n".join(d.text for d in ctx.sources.values()
+                       ) + "\n" + extra_text
     found = {_normalize_number(n) for n in NUMBER_RE.findall(corpus)}
     found |= {_normalize_number(m) for m in MONEY_RE.findall(corpus)}
     # thousands written as "248k" or "USD 248,000" -> both forms
@@ -79,7 +80,8 @@ def readability(text: str) -> dict[str, float]:
             "avg_sentence_words": 0.0,
             "flesch_reading_ease": 0.0,
         }
-    syllables = sum(max(1, len(re.findall(r"[aeiouy]+", w.lower()))) for w in words)
+    syllables = sum(
+        max(1, len(re.findall(r"[aeiouy]+", w.lower()))) for w in words)
     asl = len(words) / len(sentences)
     asw = syllables / len(words)
     return {
@@ -191,7 +193,8 @@ def make_find_duplicate_content(ctx: DocumentContext):
             return "sections_json must be a JSON object of {target: text}."
         dups = duplicate_sentences({str(k): str(v) for k, v in texts.items()})
         return (
-            json.dumps([{"sentence": s, "targets": t} for s, t in dups], indent=1)
+            json.dumps([{"sentence": s, "targets": t}
+                       for s, t in dups], indent=1)
             if dups
             else "No duplicated sentences found."
         )
@@ -208,7 +211,8 @@ def make_check_placeholders(ctx: DocumentContext):
             text: The text to check.
         """
         found = sorted(set(PLACEHOLDER_RE.findall(text)))
-        gaps = re.findall(r"\[(?:insert|tbd|todo|missing)[^\]]*\]", text, re.IGNORECASE)
+        gaps = re.findall(
+            r"\[(?:insert|tbd|todo|missing)[^\]]*\]", text, re.IGNORECASE)
         return json.dumps({"placeholders": found, "gap_markers": gaps})
 
     return check_remaining_placeholders

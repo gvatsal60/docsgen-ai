@@ -59,7 +59,8 @@ class SectionRequirement(BaseModel):
 
 
 class PlaceholderRequirement(BaseModel):
-    key: str = Field(description="Placeholder key without braces, exactly as listed.")
+    key: str = Field(
+        description="Placeholder key without braces, exactly as listed.")
     description: str
     expected_type: Literal[
         "text", "date", "number", "currency", "name", "paragraph", "other"
@@ -165,7 +166,8 @@ class ResearchResult(BaseModel):
 
 # -------------------------------------------------------------------- Agent 4: Generation
 class GeneratedSection(BaseModel):
-    target: str = Field(description="Section id (e.g. s04) or placeholder key.")
+    target: str = Field(
+        description="Section id (e.g. s04) or placeholder key.")
     target_type: Literal["section", "placeholder"]
     title: str = ""
     content: str = Field(

@@ -115,7 +115,8 @@ class AgentManager:
             return agent(
                 prompt,
                 structured_output_model=spec.output_model,
-                limits={"turns": MAX_TURNS[role], "structured_output_attempts": 3},
+                limits={"turns": MAX_TURNS[role],
+                        "structured_output_attempts": 3},
                 cancel_signal=cancel,
             )
 
@@ -131,7 +132,8 @@ class AgentManager:
             raise AgentRunError(record.error, record) from exc
         except Exception as exc:
             record.error = sanitize_error(exc)
-            raise AgentRunError(f"{spec.label} failed: {record.error}", record) from exc
+            raise AgentRunError(
+                f"{spec.label} failed: {record.error}", record) from exc
         finally:
             executor.shutdown(wait=False, cancel_futures=True)
             record.duration_ms = int((time.monotonic() - started) * 1000)

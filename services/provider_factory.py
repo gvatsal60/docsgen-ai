@@ -62,7 +62,8 @@ def validate_config(
         if mode == "assume_role" and not settings.get("role_arn"):
             problems.append("An IAM role ARN is required to assume a role.")
         if mode == "profile" and not settings.get("profile_name"):
-            problems.append("A profile name is required for profile authentication.")
+            problems.append(
+                "A profile name is required for profile authentication.")
         if mode == "bedrock_api_key" and not secrets.get("bedrock_api_key"):
             problems.append("A Bedrock API key is required.")
     return problems
@@ -157,7 +158,8 @@ def create_model(
     config: ProviderConfig, secrets: dict[str, str], *, allow_http_remote: bool = False
 ):
     """Instantiate the Strands model for ``config``. Raises ProviderConfigError / ProviderDependencyError."""
-    problems = validate_config(config, secrets, allow_http_remote=allow_http_remote)
+    problems = validate_config(
+        config, secrets, allow_http_remote=allow_http_remote)
     if problems:
         raise ProviderConfigError(" ".join(problems))
     cls = _load_class(config)

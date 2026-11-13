@@ -5,11 +5,9 @@ from __future__ import annotations
 import docx
 from docx.shared import Pt, RGBColor
 
-from document_engine.placeholder_manager import (
-    find_placeholders,
-    remaining_placeholders,
-    replace_placeholders,
-)
+from document_engine.placeholder_manager import (find_placeholders,
+                                                 remaining_placeholders,
+                                                 replace_placeholders)
 
 
 def _doc_with_split_placeholder():
@@ -65,7 +63,8 @@ def test_headers_footers_tables_and_hyperlinks(sample_template):
     keys = {h.key for h in find_placeholders(doc)}
     assert "company_name" in keys
     replace_placeholders(
-        doc, {"company_name": "ACME", "prepared_by": "Jo", "reference_number": "R-1"}
+        doc, {"company_name": "ACME", "prepared_by": "Jo",
+              "reference_number": "R-1"}
     )
     header_text = "".join(p.text for p in doc.sections[0].header.paragraphs)
     footer_text = "".join(p.text for p in doc.sections[0].footer.paragraphs)
@@ -91,7 +90,7 @@ def test_text_box_placeholders(tmp_path):
     run = parse_xml(f"<w:r {nsdecl}><w:t>Box: </w:t></w:r>")
     box = parse_xml(
         "<w:r"
-        f" {nsdecl}><w:pict><w:txbxContent><w:p><w:r><w:t>{{{{boxed}}}}</w:t></w:r></w:p></w:txbxContent></w:pict></w:r>"  # noqa: E501
+        f" {nsdecl}><w:pict><w:txbxContent><w:p><w:r><w:t>{{{{boxed}}}}</w:t></w:r></w:p></w:txbxContent></w:pict></w:r>"
     )
     p._p.append(run)
     p._p.append(box)

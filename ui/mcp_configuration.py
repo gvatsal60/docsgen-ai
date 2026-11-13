@@ -7,26 +7,13 @@ import re
 
 import streamlit as st
 
-from models.mcp_models import (
-    AUTH_LABELS,
-    TRANSPORT_LABELS,
-    AuthType,
-    ConnectPolicy,
-    MCPServerConfig,
-    TransportType,
-)
+from models.mcp_models import (AUTH_LABELS, TRANSPORT_LABELS, AuthType,
+                               ConnectPolicy, MCPServerConfig, TransportType)
 from services.container import ServiceContainer
 from services.mcp_credential_manager import API_KEY, BEARER, OAUTH_SECRET
 from services.security import sanitize_error
-from ui.components import (
-    badge,
-    confirm_button,
-    flash,
-    format_kv_lines,
-    page_header,
-    parse_kv_lines,
-    show_flashes,
-)
+from ui.components import (badge, confirm_button, flash, format_kv_lines,
+                           page_header, parse_kv_lines, show_flashes)
 
 FORM_KEY = "mcp_form_target"  # "new" | server id | None
 
@@ -92,14 +79,16 @@ def _server_card(c: ServiceContainer, cfg: MCPServerConfig) -> None:
             f"**Tools:** {state.tool_count} discovered, {enabled_tools} enabled"
         )
         top[2].caption(
-            "Saved permanently" if c.mcp.is_persisted(cfg.id) else "Session only"
+            "Saved permanently" if c.mcp.is_persisted(
+                cfg.id) else "Session only"
         )
         top[3].markdown(
             f"**Server:** {'enabled' if cfg.enabled else 'disabled'}  \n**Connect:**"
             f" {cfg.connect_policy.value.replace('_', ' ')}"
         )
         if state.last_connected_at:
-            top[3].caption(f"Last connected {state.last_connected_at:%H:%M:%S}")
+            top[3].caption(
+                f"Last connected {state.last_connected_at:%H:%M:%S}")
         if state.last_error:
             st.error(f"Last error: {state.last_error}", icon="⚠️")
 
@@ -155,7 +144,8 @@ def _server_card(c: ServiceContainer, cfg: MCPServerConfig) -> None:
                 "Delete", key=f"del_{cfg.id}", confirm_label="Delete", width="stretch"
             ):
                 c.mcp.delete_server(cfg.id)
-                flash(f"Deleted server {cfg.name} and its stored credentials.", "info")
+                flash(
+                    f"Deleted server {cfg.name} and its stored credentials.", "info")
                 st.rerun()
         if b[6].button(
             "Logs",
@@ -173,7 +163,8 @@ def _server_card(c: ServiceContainer, cfg: MCPServerConfig) -> None:
                 f"{result['message']} ({result['latency_ms']} ms)"
             )
             with st.expander("Diagnostics", expanded=not result["ok"]):
-                st.code("\n".join(result["diagnostics"]) or "—", language="text")
+                st.code("\n".join(result["diagnostics"])
+                        or "—", language="text")
                 if result["tool_names"]:
                     st.caption("Tools: " + ", ".join(result["tool_names"]))
         if st.session_state.get(f"show_logs_{cfg.id}"):
@@ -193,13 +184,15 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
     fk = "mcpf_" + (existing.id if existing is not None else "new")
     e = existing
     with st.container(border=True):
-        st.markdown("#### " + (f"Edit {e.name}" if e is not None else "Add MCP server"))
+        st.markdown(
+            "#### " + (f"Edit {e.name}" if e is not None else "Add MCP server"))
         st.caption("Basic configuration")
         r = st.columns([2, 1, 1])
         name = r[0].text_input(
             "Server name *", value=e.name if e else "", key=f"{fk}_name"
         )
-        suggested = re.sub(r"[^a-z0-9_]", "_", name.lower()).strip("_")[:32] or ""
+        suggested = re.sub(r"[^a-z0-9_]", "_",
+                           name.lower()).strip("_")[:32] or ""
         server_id = r[1].text_input(
             "Server identifier *",
             value=e.id if e else suggested,
@@ -286,11 +279,13 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
                     placeholder=hint or "value",
                     label_visibility="collapsed",
                 )
-                remove = cols[2].checkbox("Remove", key=f"{fk}_senv_rm_{env_name}")
+                remove = cols[2].checkbox(
+                    "Remove", key=f"{fk}_senv_rm_{env_name}")
                 if not remove:
                     keep.append(env_name)
                     if new_val:
-                        secrets_to_store[c.mcp_secrets.env_key(env_name)] = new_val
+                        secrets_to_store[c.mcp_secrets.env_key(
+                            env_name)] = new_val
             cols = st.columns([2, 3, 1])
             add_name = cols[0].text_input(
                 "New secret variable name",
@@ -302,7 +297,8 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
             )
             if add_name and add_val:
                 keep.append(add_name.strip())
-                secrets_to_store[c.mcp_secrets.env_key(add_name.strip())] = add_val
+                secrets_to_store[c.mcp_secrets.env_key(
+                    add_name.strip())] = add_val
             values["secret_env_keys"] = keep
         else:
             values["url"] = st.text_input(
@@ -409,7 +405,8 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
                 if not cols[2].checkbox("Remove", key=f"{fk}_shdr_rm_{hname}"):
                     keep.append(hname)
                     if new_val:
-                        secrets_to_store[c.mcp_secrets.header_key(hname)] = new_val
+                        secrets_to_store[c.mcp_secrets.header_key(
+                            hname)] = new_val
             cols = st.columns([2, 3, 1])
             add_h = cols[0].text_input(
                 "New secret header name",
@@ -421,7 +418,8 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
             )
             if add_h and add_hv:
                 keep.append(add_h.strip())
-                secrets_to_store[c.mcp_secrets.header_key(add_h.strip())] = add_hv
+                secrets_to_store[c.mcp_secrets.header_key(
+                    add_h.strip())] = add_hv
             values["secret_header_names"] = keep
 
         st.caption("Execution")
@@ -471,7 +469,8 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
         )
 
         b = st.columns([1, 1, 1, 3])
-        save = b[0].button("Save", type="primary", key=f"{fk}_save", width="stretch")
+        save = b[0].button("Save", type="primary",
+                           key=f"{fk}_save", width="stretch")
         save_connect = b[1].button(
             "Save & connect", key=f"{fk}_save_connect", width="stretch"
         )
@@ -502,7 +501,8 @@ def _server_form(c: ServiceContainer, existing: MCPServerConfig | None) -> None:
                 st.error(sanitize_error(exc))
                 return
             for secret_name, secret_value in secrets_to_store.items():
-                c.mcp_secrets.set(cfg.id, secret_name, secret_value, persist=persist)
+                c.mcp_secrets.set(cfg.id, secret_name,
+                                  secret_value, persist=persist)
             problems = c.mcp.validate(cfg)
             if problems:
                 for p in problems:
@@ -592,7 +592,8 @@ def _tool_selection(c: ServiceContainer) -> None:
         hide_index=True,
         width="stretch",
         disabled=["Tool", "MCP server", "Risk", "Description"],
-        column_config={"Enabled": st.column_config.CheckboxColumn(width="small")},
+        column_config={
+            "Enabled": st.column_config.CheckboxColumn(width="small")},
     )
     changes = [
         (i, row["Enabled"])
@@ -601,7 +602,8 @@ def _tool_selection(c: ServiceContainer) -> None:
     ]
     if changes:
         for info, enabled in changes:
-            c.mcp.set_tools_enabled(info.server_id, [info.original_name], bool(enabled))
+            c.mcp.set_tools_enabled(
+                info.server_id, [info.original_name], bool(enabled))
         st.session_state.pop("mcp_tools_editor", None)
         st.rerun()
     st.caption(
@@ -630,7 +632,8 @@ def _tool_tester(c: ServiceContainer) -> None:
         info = next(i for i in infos if i.qualified_name == chosen)
         st.caption(info.description)
         props = (info.input_schema or {}).get("properties", {})
-        example = {k: "" if v.get("type") == "string" else 0 for k, v in props.items()}
+        example = {k: "" if v.get(
+            "type") == "string" else 0 for k, v in props.items()}
         args_text = st.text_area(
             "Arguments (JSON)",
             value=json.dumps(example, indent=1),
@@ -654,7 +657,8 @@ def _tool_tester(c: ServiceContainer) -> None:
                 st.error(f"Invalid JSON arguments: {exc}")
                 return
             if not isinstance(args, dict):
-                st.error("Invalid JSON arguments: Arguments must be a JSON object.")
+                st.error(
+                    "Invalid JSON arguments: Arguments must be a JSON object.")
                 return
             with st.spinner("Calling tool…"):
                 result = c.mcp.test_tool(
@@ -666,7 +670,8 @@ def _tool_tester(c: ServiceContainer) -> None:
             st.code(
                 result.output or "(empty)",
                 language=(
-                    "json" if result.output.strip().startswith(("{", "[")) else "text"
+                    "json" if result.output.strip().startswith(
+                        ("{", "[")) else "text"
                 ),
             )
 

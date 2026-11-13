@@ -99,7 +99,8 @@ def find_placeholders(doc: DocxDocument) -> list[PlaceholderHit]:
                     start <= m.start() and m.end() <= end for _, start, end in spans
                 )
                 hits.append(
-                    PlaceholderHit(m.group(1), m.group(0), _location(p, kind), split)
+                    PlaceholderHit(m.group(1), m.group(
+                        0), _location(p, kind), split)
                 )
     return hits
 
@@ -134,7 +135,8 @@ def replace_in_paragraph(p: etree._Element, values: dict[str, str]) -> list[str]
     text, spans = _paragraph_runs_text(p)
     if "{{" not in text:
         return []
-    matches = [m for m in PLACEHOLDER_RE.finditer(text) if m.group(1) in values]
+    matches = [m for m in PLACEHOLDER_RE.finditer(
+        text) if m.group(1) in values]
     replaced: list[str] = []
     for m in reversed(matches):  # right to left keeps earlier offsets valid
         start, end, key = m.start(), m.end(), m.group(1)
@@ -144,7 +146,7 @@ def replace_in_paragraph(p: etree._Element, values: dict[str, str]) -> list[str]
         t_first, s_first, _ = spans[first]
         t_last, s_last, _ = spans[last]
         before = (t_first.text or "")[: start - s_first]
-        after = (t_last.text or "")[end - s_last :]
+        after = (t_last.text or "")[end - s_last:]
         if first == last:
             _write_value(t_first, before, value, after)
         else:

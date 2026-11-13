@@ -119,7 +119,8 @@ def load_sources(
         stored = container.files.store(
             name, (SAMPLES / name).read_bytes(), ALLOWED_SOURCE_TYPES
         )
-        doc = container.extraction.extract(stored, set(container.session.sources))
+        doc = container.extraction.extract(
+            stored, set(container.session.sources))
         container.session.sources[doc.doc_id] = doc
 
 

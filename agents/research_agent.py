@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from agents.base import AgentSpec
 from agents.prompting import compact_json, task_block
-from models.agent_models import AgentRole, ExtractionResult, ResearchResult, TaskType
+from models.agent_models import (AgentRole, ExtractionResult, ResearchResult,
+                                 TaskType)
 
 SPEC = AgentSpec(
     role=AgentRole.RESEARCH_AGENT,
@@ -48,7 +49,8 @@ def build_prompt(
         "AVAILABLE TOOLS: " + (", ".join(tool_names) if tool_names else "none")
     )
     if topics.strip():
-        parts.append("RESEARCH TOPICS REQUESTED BY THE USER:\n" + topics.strip()[:4000])
+        parts.append("RESEARCH TOPICS REQUESTED BY THE USER:\n" +
+                     topics.strip()[:4000])
     if questions:
         parts.append(
             "OPEN QUESTIONS FROM EXTRACTION (research only those that are public"
@@ -58,7 +60,8 @@ def build_prompt(
         parts.append(
             "KNOWN FACTS (context only):\n"
             + compact_json(
-                extraction.model_copy(update={"mappings": [], "missing": []}), 8_000
+                extraction.model_copy(
+                    update={"mappings": [], "missing": []}), 8_000
             )
         )
     parts.append("Return the ResearchResult.")

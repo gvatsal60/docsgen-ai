@@ -13,7 +13,8 @@ from strands.models.openai import OpenAIModel
 from models.provider_models import ProviderConfig, ProviderId
 from services import model_registry
 from services.llm_service import LLMNotConfiguredError, LLMService
-from services.provider_factory import ProviderConfigError, create_model, validate_config
+from services.provider_factory import (ProviderConfigError, create_model,
+                                       validate_config)
 from testkit.helpers import ScriptedModel
 
 
@@ -95,7 +96,8 @@ def test_openai_parameters_and_token_param():
         model_id="o4-mini",
         temperature=0.3,
         max_tokens=500,
-        settings={"token_param": "max_completion_tokens", "send_temperature": False},
+        settings={"token_param": "max_completion_tokens",
+                  "send_temperature": False},
     )
     model = create_model(cfg, {"api_key": "sk-test-1234567890abcdef"})
     assert model.get_config()["params"] == {"max_completion_tokens": 500}
@@ -106,7 +108,8 @@ def test_validation_messages():
         ProviderConfig(provider=ProviderId.OPENAI, model_id="m"), {}
     )
     assert "Select or enter a model." in validate_config(
-        ProviderConfig(provider=ProviderId.ANTHROPIC, model_id=""), {"api_key": "k"}
+        ProviderConfig(provider=ProviderId.ANTHROPIC,
+                       model_id=""), {"api_key": "k"}
     )
     problems = validate_config(
         ProviderConfig(
@@ -128,7 +131,8 @@ def test_validation_messages():
     # remote plain HTTP refused by default
     assert any("https" in p for p in problems)
     with pytest.raises(ProviderConfigError):
-        create_model(ProviderConfig(provider=ProviderId.GEMINI, model_id="g"), {})
+        create_model(ProviderConfig(
+            provider=ProviderId.GEMINI, model_id="g"), {})
 
 
 def test_every_provider_has_spec_and_catalog_entries():

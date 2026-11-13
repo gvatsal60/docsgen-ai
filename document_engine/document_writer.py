@@ -25,20 +25,14 @@ from docx.document import Document as DocxDocument
 from docx.oxml.ns import qn
 from lxml import etree
 
-from document_engine.formatting_preserver import (
-    NS,
-    add_text_run,
-    clean_paragraph_properties,
-    compare_snapshots,
-    is_structural,
-    new_paragraph,
-    reference_run_properties,
-    snapshot,
-)
-from document_engine.placeholder_manager import (
-    remaining_placeholders,
-    replace_placeholders,
-)
+from document_engine.formatting_preserver import (NS, add_text_run,
+                                                  clean_paragraph_properties,
+                                                  compare_snapshots,
+                                                  is_structural, new_paragraph,
+                                                  reference_run_properties,
+                                                  snapshot)
+from document_engine.placeholder_manager import (remaining_placeholders,
+                                                 replace_placeholders)
 from document_engine.template_parser import Block, analyze_document
 from models.agent_models import InsertMode, SectionDraft
 from models.document_models import WriteReport
@@ -82,7 +76,8 @@ def parse_content(content: str) -> list[ContentBlock]:
             rows = [[c.strip() for c in line.strip().strip("|").split("|")]]
             i += 2
             while i < len(lines) and _TABLE_ROW.match(lines[i]):
-                rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")])
+                rows.append([c.strip()
+                            for c in lines[i].strip().strip("|").split("|")])
                 i += 1
             blocks.append(ContentBlock("table", rows=rows))
             continue
@@ -157,7 +152,8 @@ class ListFormatter:
             num_pr = ppr.find("w:numPr", NS) if ppr is not None else None
             if num_pr is None:
                 continue
-            num_id_el, ilvl_el = num_pr.find("w:numId", NS), num_pr.find("w:ilvl", NS)
+            num_id_el, ilvl_el = num_pr.find(
+                "w:numId", NS), num_pr.find("w:ilvl", NS)
             if num_id_el is None:
                 continue
             fmt = self._num_format(
@@ -188,7 +184,8 @@ class ListFormatter:
             new_num = etree.SubElement(self.numbering, qn("w:num"))
             new_num.set(qn("w:numId"), new_id)
             abstract = etree.SubElement(new_num, qn("w:abstractNumId"))
-            abstract.set(qn("w:val"), src.find("w:abstractNumId", NS).get(qn("w:val")))
+            abstract.set(qn("w:val"), src.find(
+                "w:abstractNumId", NS).get(qn("w:val")))
             override = etree.SubElement(new_num, qn("w:lvlOverride"))
             override.set(qn("w:ilvl"), "0")
             start = etree.SubElement(override, qn("w:startOverride"))
@@ -253,7 +250,8 @@ class DocumentWriter:
                 self.lists.start_numbered_list()
                 number_counter = 0
             if block.kind in ("bullet", "number"):
-                ppr, fallback = self.lists.paragraph_properties(block.kind, base_ppr)
+                ppr, fallback = self.lists.paragraph_properties(
+                    block.kind, base_ppr)
                 if block.kind == "number":
                     number_counter += 1
                 prefix = (
@@ -294,7 +292,8 @@ class DocumentWriter:
                 p = cell.paragraphs[0]._p
                 text = row[c_idx] if c_idx < len(row) else ""
                 for piece, bold, italic in _inline_runs(text):
-                    add_text_run(p, piece, rpr, bold=bold or r_idx == 0, italic=italic)
+                    add_text_run(
+                        p, piece, rpr, bold=bold or r_idx == 0, italic=italic)
         tbl.getparent().remove(
             tbl
         )  # detach from the end of the body; inserted by the caller
@@ -385,7 +384,8 @@ class DocumentWriter:
             removable = instructions
             position = "after_content"
         else:
-            removable = instructions + (empties if not section.has_real_content else [])
+            removable = instructions + \
+                (empties if not section.has_real_content else [])
             position = (
                 "first_removed"
                 if instructions or not section.has_real_content
@@ -434,7 +434,8 @@ class DocumentWriter:
             else:
                 section_drafts.append(d)
         # Sections are written bottom-up so earlier block indices stay valid.
-        order = {s.section_id: i for i, s in enumerate(self.structure.sections)}
+        order = {s.section_id: i for i,
+                 s in enumerate(self.structure.sections)}
         for d in sorted(
             section_drafts, key=lambda x: order.get(x.target, -1), reverse=True
         ):
@@ -454,7 +455,8 @@ class DocumentWriter:
         before = snapshot(self.template_path)
         after = snapshot(out_path)
         self.report.format_checks = compare_snapshots(
-            before, after, changed_parts_expected=getattr(self, "_touched_parts", set())
+            before, after, changed_parts_expected=getattr(
+                self, "_touched_parts", set())
         )
         return self.report
 

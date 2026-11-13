@@ -8,14 +8,8 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from models.mcp_models import (
-    ConnectPolicy,
-    MCPServerConfig,
-    MCPServerState,
-    MCPTestResult,
-    MCPToolInfo,
-    ToolTestResult,
-)
+from models.mcp_models import (ConnectPolicy, MCPServerConfig, MCPServerState,
+                               MCPTestResult, MCPToolInfo, ToolTestResult)
 from services.mcp_client_factory import ClientPolicy, validate_server_config
 from services.mcp_connection_manager import MCPConnectionManager
 from services.mcp_credential_manager import MCPCredentialManager
@@ -55,7 +49,8 @@ class MCPManager:
                 result[cfg.id] = cfg
             except ValueError as exc:
                 logger.warning(
-                    "Ignoring invalid saved MCP server: %s", sanitize_error(exc)
+                    "Ignoring invalid saved MCP server: %s", sanitize_error(
+                        exc)
                 )
         return result
 
@@ -74,7 +69,8 @@ class MCPManager:
 
     def save_server(self, cfg: MCPServerConfig, *, persist: bool, is_new: bool) -> None:
         if is_new and self.get_server(cfg.id) is not None:
-            raise ValueError(f"A server with identifier '{cfg.id}' already exists.")
+            raise ValueError(
+                f"A server with identifier '{cfg.id}' already exists.")
         if persist:
             servers = self._persisted()
             servers[cfg.id] = cfg
@@ -89,13 +85,15 @@ class MCPManager:
 
     def _write(self, servers: dict[str, MCPServerConfig]) -> None:
         self._store.update(
-            "mcp_servers", [s.model_dump(mode="json") for s in servers.values()]
+            "mcp_servers", [s.model_dump(mode="json")
+                            for s in servers.values()]
         )
 
     def _update(self, cfg: MCPServerConfig) -> None:
         self.save_server(
             cfg,
-            persist=self.is_persisted(cfg.id) or cfg.id not in self._session_servers,
+            persist=self.is_persisted(
+                cfg.id) or cfg.id not in self._session_servers,
             is_new=False,
         )
 
@@ -136,7 +134,8 @@ class MCPManager:
                 "Enable the server before connecting.",
             )
             return st
-        state = self.connections.connect(cfg, default_enabled=self._default_enabled())
+        state = self.connections.connect(
+            cfg, default_enabled=self._default_enabled())
         if state.status == "connected":
             self._record_tool_defaults(cfg)
         return state
@@ -209,7 +208,8 @@ class MCPManager:
     ) -> ToolTestResult:
         """Run a tool once from the UI. Consequential tools require explicit confirmation."""
         info = next(
-            (i for i in self.tool_infos(server_id) if i.original_name == original_name),
+            (i for i in self.tool_infos(server_id)
+             if i.original_name == original_name),
             None,
         )
         if info is None:
@@ -248,7 +248,8 @@ class MCPManager:
     def export_config(self) -> str:
         """Export non-secret server configuration as JSON (secrets are never exported)."""
         return json.dumps(
-            {"mcpServers": [s.model_dump(mode="json") for s in self.list_servers()]},
+            {"mcpServers": [s.model_dump(mode="json")
+                            for s in self.list_servers()]},
             indent=2,
         )
 
@@ -311,7 +312,8 @@ def _convert_external_entry(name: str, raw: dict) -> dict:
         # Values that reference environment placeholders are kept as plain values (no secrets imported).
         entry["env"] = {k: str(v) for k, v in env.items()}
     else:
-        transport = raw.get("transport") or raw.get("type") or "streamable_http"
+        transport = raw.get("transport") or raw.get(
+            "type") or "streamable_http"
         entry.update(
             transport="sse" if "sse" in str(transport) else "streamable_http",
             url=raw.get("url"),

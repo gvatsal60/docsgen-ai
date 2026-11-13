@@ -3,14 +3,10 @@
 from __future__ import annotations
 
 from agents.base import GROUNDING_RULES, AgentSpec
-from agents.prompting import (
-    compact_json,
-    sources_digest,
-    task_block,
-    template_digest,
-    user_answers_block,
-)
-from models.agent_models import AgentRole, ExtractionResult, TaskType, TemplateAnalysis
+from agents.prompting import (compact_json, sources_digest, task_block,
+                              template_digest, user_answers_block)
+from models.agent_models import (AgentRole, ExtractionResult, TaskType,
+                                 TemplateAnalysis)
 from tools.context import DocumentContext
 
 SPEC = AgentSpec(

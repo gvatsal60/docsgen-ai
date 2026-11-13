@@ -12,19 +12,9 @@ import streamlit as st
 
 from config import APP_NAME, APP_VERSION
 from storage.session_store import get_container
-from ui import (
-    ai_configuration,
-    dashboard,
-    download,
-    instructions,
-    mcp_configuration,
-    review,
-    settings,
-    theme,
-    tool_registry,
-    upload,
-    workflow,
-)
+from ui import (ai_configuration, dashboard, download, instructions,
+                mcp_configuration, review, settings, theme, tool_registry,
+                upload, workflow)
 from ui.components import NAV_KEY, apply_pending_navigation, badge
 
 ROOT = Path(__file__).resolve().parent
@@ -75,7 +65,8 @@ def main() -> None:
         if not container.llm.is_configured():
             st.markdown(badge("LLM not configured", "disabled"))
         else:
-            kind = "ok" if status.ok else ("error" if status.ok is False else "pending")
+            kind = "ok" if status.ok else (
+                "error" if status.ok is False else "pending")
             st.markdown(
                 badge(
                     "LLM "

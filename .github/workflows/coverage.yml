@@ -27,15 +27,15 @@ jobs:
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3
       - name: Run Codecov
         run: just codecov
-      # - name: Upload coverage reports to Codecov
-      #   uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     files: ./coverage/coverage.xml
-      # - name: Upload test results to Codecov
-      #   if: ${{ !cancelled() }}
-      #   uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     report_type: test_results
-      #     files: ./coverage/junit.xml
+    # - name: Upload coverage reports to Codecov
+    #   uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     files: ./coverage/coverage.xml
+    # - name: Upload test results to Codecov
+    #   if: ${{ !cancelled() }}
+    #   uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     report_type: test_results
+    #     files: ./coverage/junit.xml

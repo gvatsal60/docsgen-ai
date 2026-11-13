@@ -6,18 +6,13 @@ from typing import Any
 
 import streamlit as st
 
-from models.agent_models import (
-    AGENT_LABELS,
-    STAGE_ORDER,
-    TASK_LABELS,
-    WRITING_TASKS,
-    AgentRole,
-    TaskType,
-    WorkflowStage,
-)
+from models.agent_models import (AGENT_LABELS, STAGE_ORDER, TASK_LABELS,
+                                 WRITING_TASKS, AgentRole, TaskType,
+                                 WorkflowStage)
 from services.container import ServiceContainer
 from services.workflow_service import WorkflowService
-from ui.components import badge, goto_button, page_header, run_with_status, show_flashes
+from ui.components import (badge, goto_button, page_header, run_with_status,
+                           show_flashes)
 
 STEP_LABELS = {
     WorkflowStage.NOT_STARTED: "Not started",
@@ -90,9 +85,11 @@ def render(c: ServiceContainer) -> None:
             "Configure the AI provider", "AI Provider Configuration", key="wf_go_ai"
         )
     if not ready_tpl:
-        goto_button("Upload a template", "Document Template Upload", key="wf_go_tpl")
+        goto_button("Upload a template",
+                    "Document Template Upload", key="wf_go_tpl")
     if needs_sources and not c.session.sources:
-        goto_button("Upload source documents", "Source Documents", key="wf_go_src")
+        goto_button("Upload source documents",
+                    "Source Documents", key="wf_go_src")
 
     with st.expander("Agents and their authorized tools"):
         cols = st.columns(3)
@@ -135,11 +132,13 @@ def render(c: ServiceContainer) -> None:
         step_defs = [
             (
                 "1 · Analyze template",
-                lambda s, p: c.workflow.analyze_template(s, c.document_context(), p),
+                lambda s, p: c.workflow.analyze_template(
+                    s, c.document_context(), p),
             ),
             (
                 "2 · Extract",
-                lambda s, p: c.workflow.extract_information(s, c.document_context(), p),
+                lambda s, p: c.workflow.extract_information(
+                    s, c.document_context(), p),
             ),
             (
                 "3 · Research",
@@ -147,7 +146,8 @@ def render(c: ServiceContainer) -> None:
             ),
             (
                 "4 · Generate",
-                lambda s, p: c.workflow.generate(s, c.document_context(), progress=p),
+                lambda s, p: c.workflow.generate(
+                    s, c.document_context(), progress=p),
             ),
             (
                 "5 · Validate",
@@ -155,7 +155,8 @@ def render(c: ServiceContainer) -> None:
             ),
             (
                 "6 · Quality review",
-                lambda s, p: c.workflow.quality_review(s, c.document_context(), p),
+                lambda s, p: c.workflow.quality_review(
+                    s, c.document_context(), p),
             ),
         ]
         for col, (label, fn) in zip(steps, step_defs):
@@ -207,9 +208,11 @@ def render(c: ServiceContainer) -> None:
 
     with st.expander("Event log", expanded=False):
         for e in reversed(state.events):
-            icon = {"success": "✅", "warning": "⚠️", "error": "❌"}.get(e.level, "ℹ️")
+            icon = {"success": "✅", "warning": "⚠️",
+                    "error": "❌"}.get(e.level, "ℹ️")
             who = f" [{AGENT_LABELS[e.agent]}]" if e.agent else ""
-            st.markdown(f"{icon} `{e.at:%H:%M:%S}` **{e.step}**{who} — {e.message}")
+            st.markdown(
+                f"{icon} `{e.at:%H:%M:%S}` **{e.step}**{who} — {e.message}")
         if state.agent_runs:
             st.dataframe(
                 [
@@ -249,7 +252,8 @@ def _results(c: ServiceContainer, state) -> None:
             )
             if state.template_analysis.placeholders:
                 st.dataframe(
-                    [p.model_dump() for p in state.template_analysis.placeholders],
+                    [p.model_dump()
+                     for p in state.template_analysis.placeholders],
                     hide_index=True,
                     width="stretch",
                 )

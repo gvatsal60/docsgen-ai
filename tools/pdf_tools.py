@@ -7,12 +7,8 @@ from pathlib import Path
 
 from strands import tool
 
-from models.document_models import (
-    ExtractedTable,
-    SourceChunk,
-    SourceDocument,
-    SourceRef,
-)
+from models.document_models import (ExtractedTable, SourceChunk,
+                                    SourceDocument, SourceRef)
 from services.security import wrap_untrusted
 from tools.context import DocumentContext
 from tools.text_extraction import CHUNK_CHARS, extract_entities
@@ -44,7 +40,7 @@ def extract_pdf(path: Path, doc_id: str, file_name: str, sha256: str) -> SourceD
                 continue
             # split long pages into several chunks, all referencing the page
             parts = [
-                page_text[i : i + CHUNK_CHARS]
+                page_text[i: i + CHUNK_CHARS]
                 for i in range(0, len(page_text), CHUNK_CHARS)
             ]
             for n, part in enumerate(parts, start=1):
@@ -66,7 +62,8 @@ def extract_pdf(path: Path, doc_id: str, file_name: str, sha256: str) -> SourceD
                     )
                 )
     if not any(texts):
-        warnings.append("No text layer was found. Scanned PDFs need OCR before upload.")
+        warnings.append(
+            "No text layer was found. Scanned PDFs need OCR before upload.")
 
     tables: list[ExtractedTable] = []
     try:
@@ -75,7 +72,8 @@ def extract_pdf(path: Path, doc_id: str, file_name: str, sha256: str) -> SourceD
         with pdfplumber.open(str(path)) as plumber:
             for index, page in enumerate(plumber.pages[:MAX_TABLE_PAGES]):
                 for t_index, table in enumerate(page.extract_tables() or [], start=1):
-                    rows = [[(c or "").strip() for c in row] for row in table if row]
+                    rows = [[(c or "").strip() for c in row]
+                            for row in table if row]
                     if len(rows) < 2:
                         continue
                     ref = SourceRef(
@@ -96,7 +94,8 @@ def extract_pdf(path: Path, doc_id: str, file_name: str, sha256: str) -> SourceD
         logger.info("PDF table extraction skipped: %s", type(exc).__name__)
         warnings.append("Table extraction was skipped for this PDF.")
 
-    full_text = "\n\n".join(f"[page {i + 1}]\n{t}" for i, t in enumerate(texts) if t)
+    full_text = "\n\n".join(
+        f"[page {i + 1}]\n{t}" for i, t in enumerate(texts) if t)
     return SourceDocument(
         doc_id=doc_id,
         file_name=file_name,

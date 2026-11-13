@@ -157,7 +157,8 @@ class MCPServerConfig(BaseModel):
         if value is None or value == "":
             return None
         if not re.match(r"^[A-Za-z][A-Za-z0-9_]{0,23}$", value):
-            raise ValueError("Tool prefix must be 1–24 letters, digits or underscores.")
+            raise ValueError(
+                "Tool prefix must be 1–24 letters, digits or underscores.")
         return value
 
     @model_validator(mode="after")
@@ -178,7 +179,8 @@ class MCPServerConfig(BaseModel):
                         " HTTP."
                     )
                 if not self.oauth_client_id:
-                    raise ValueError("OAuth client credentials require a client ID.")
+                    raise ValueError(
+                        "OAuth client credentials require a client ID.")
         return self
 
     @property
@@ -190,7 +192,8 @@ class MCPServerConfig(BaseModel):
         return f"{self.effective_prefix}_{original}"
 
 
-ServerStatus = Literal["disconnected", "connecting", "connected", "error", "disabled"]
+ServerStatus = Literal["disconnected",
+                       "connecting", "connected", "error", "disabled"]
 
 
 class MCPServerState(BaseModel):

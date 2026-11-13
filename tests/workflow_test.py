@@ -140,7 +140,8 @@ def test_complete_workflow_end_to_end(ready, tmp_path):
         in out.sections[0].header.paragraphs[0].text
     )
     assert record.write_report.placeholders_remaining == []
-    statuses = {chk.check: chk.status for chk in record.write_report.format_checks}
+    statuses = {
+        chk.check: chk.status for chk in record.write_report.format_checks}
     assert "changed" not in statuses.values()
 
     json_text = Path(record.json_path).read_text(encoding="utf-8")
@@ -175,7 +176,8 @@ def test_fill_selected_and_regenerate(ready):
     c.workflow.run_pipeline(state, c.document_context())
     assert set(state.drafts) == {"s04", "budget"}
     before = len(model.invocations)
-    c.workflow.regenerate(state, c.document_context(), "s04", "Make it shorter")
+    c.workflow.regenerate(state, c.document_context(),
+                          "s04", "Make it shorter")
     assert len(model.invocations) > before and state.drafts["s04"].history
     prompt = model.invocations[-1]["messages"][0]["content"][0]["text"]
     assert "Make it shorter" in prompt and "s04" in prompt

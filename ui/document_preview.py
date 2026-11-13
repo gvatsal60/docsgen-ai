@@ -11,7 +11,8 @@ from ui.components import badge
 def render_template_structure(structure: TemplateStructure) -> None:
     m = st.columns(6)
     m[0].metric(
-        "Sections", sum(1 for s in structure.sections if s.heading_block is not None)
+        "Sections", sum(
+            1 for s in structure.sections if s.heading_block is not None)
     )
     m[1].metric("Placeholders", len(structure.placeholders))
     m[2].metric("Tables", len(structure.tables))
@@ -22,7 +23,8 @@ def render_template_structure(structure: TemplateStructure) -> None:
         st.info(warning)
 
     tab_sections, tab_ph, tab_tables, tab_hf, tab_layout = st.tabs(
-        ["Sections", "Placeholders", "Tables", "Headers & footers", "Layout & metadata"]
+        ["Sections", "Placeholders", "Tables",
+            "Headers & footers", "Layout & metadata"]
     )
     with tab_sections:
         for s in structure.sections:
@@ -82,7 +84,8 @@ def render_template_structure(structure: TemplateStructure) -> None:
             if t.preview:
                 width = max(len(r) for r in t.preview)
                 st.dataframe(
-                    [dict(enumerate(r + [""] * (width - len(r)))) for r in t.preview],
+                    [dict(enumerate(r + [""] * (width - len(r))))
+                     for r in t.preview],
                     hide_index=True,
                     width="stretch",
                 )

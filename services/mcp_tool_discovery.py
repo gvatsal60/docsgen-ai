@@ -122,7 +122,8 @@ def discover_tools(
                 server_name=cfg.name,
                 title=getattr(listed.mcp_tool, "title", None),
                 description=clean_description(spec.get("description")),
-                input_schema=dict((spec.get("inputSchema") or {}).get("json") or {}),
+                input_schema=dict(
+                    (spec.get("inputSchema") or {}).get("json") or {}),
                 enabled=bool(enabled),
                 read_only=read_only,
                 destructive=destructive,

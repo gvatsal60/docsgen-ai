@@ -81,7 +81,8 @@ def flash(message: str, kind: str = "success") -> None:
 def show_flashes() -> None:
     for kind, message in st.session_state.pop("_flash", []):
         getattr(
-            st, kind if kind in ("success", "info", "warning", "error") else "info"
+            st, kind if kind in (
+                "success", "info", "warning", "error") else "info"
         )(message)
 
 

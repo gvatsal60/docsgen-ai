@@ -24,24 +24,14 @@ from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from strands.hooks import (
-    AfterToolCallEvent,
-    BeforeToolCallEvent,
-    HookProvider,
-    HookRegistry,
-)
+from strands.hooks import (AfterToolCallEvent, BeforeToolCallEvent,
+                           HookProvider, HookRegistry)
 
 from models.agent_models import AgentRole
 from services.security import sanitize_error, wrap_untrusted
 from storage.configuration_store import ConfigurationStore
-from tools import (
-    csv_tools,
-    docx_tools,
-    excel_tools,
-    pdf_tools,
-    text_extraction,
-    validation_tools,
-)
+from tools import (csv_tools, docx_tools, excel_tools, pdf_tools,
+                   text_extraction, validation_tools)
 from tools.context import DocumentContext
 
 A = AgentRole
@@ -289,7 +279,8 @@ class ToolRegistry:
                     source="mcp",
                     category=f"MCP · {info.server_name}",
                     description=info.description,
-                    enabled=bool(info.enabled and cfg is not None and cfg.enabled),
+                    enabled=bool(
+                        info.enabled and cfg is not None and cfg.enabled),
                     available=True,
                     server_id=info.server_id,
                     server_name=info.server_name,
@@ -571,7 +562,8 @@ class ToolGuardHook(HookProvider):
             elif "json" in block:
                 try:
                     parts.append(
-                        json.dumps(block["json"], ensure_ascii=False, default=str)
+                        json.dumps(block["json"],
+                                   ensure_ascii=False, default=str)
                     )
                 except (TypeError, ValueError):
                     dropped += 1
@@ -586,5 +578,6 @@ class ToolGuardHook(HookProvider):
         if dropped:
             text += f"\n[{dropped} non-text content block(s) omitted]"
         sanitized = dict(result)
-        sanitized["content"] = [{"text": wrap_untrusted(f"MCP tool {name}", text)}]
+        sanitized["content"] = [
+            {"text": wrap_untrusted(f"MCP tool {name}", text)}]
         return sanitized

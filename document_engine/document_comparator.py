@@ -14,7 +14,8 @@ from models.document_models import BlockDiff, ComparisonReport
 
 def document_blocks(path: Path | str, include_headers: bool = True) -> list[str]:
     doc = docx.Document(str(path))
-    blocks = [element_text(el).strip() for el in iter_body_blocks(doc.element.body)]
+    blocks = [element_text(el).strip()
+              for el in iter_body_blocks(doc.element.body)]
     if include_headers:
         for partname, kind, root in document_parts(doc):
             if kind != "body":
@@ -42,7 +43,8 @@ def compare_documents(
             continue
         if op == "insert":
             added += j2 - j1
-            diffs.extend(BlockDiff(change="added", generated=text) for text in b[j1:j2])
+            diffs.extend(BlockDiff(change="added", generated=text)
+                         for text in b[j1:j2])
         elif op == "delete":
             removed += i2 - i1
             diffs.extend(

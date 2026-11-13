@@ -10,24 +10,20 @@ from pathlib import Path
 
 from strands import tool
 
-from models.document_models import (
-    ExtractedEntities,
-    SourceChunk,
-    SourceDocument,
-    SourceRef,
-)
+from models.document_models import (ExtractedEntities, SourceChunk,
+                                    SourceDocument, SourceRef)
 from services.security import wrap_untrusted
 from tools.context import DocumentContext
 
 CHUNK_CHARS = 1_200
 
-_MONTHS = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"  # noqa: E501
+_MONTHS = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
 DATE_RE = re.compile(
-    rf"\b(?:\d{{4}}-\d{{2}}-\d{{2}}|\d{{1,2}}[/.]\d{{1,2}}[/.]\d{{2,4}}|\d{{1,2}}\s+{_MONTHS}\s+\d{{4}}|{_MONTHS}\s+\d{{1,2}},?\s+\d{{4}}|{_MONTHS}\s+\d{{4}}|Q[1-4]\s+\d{{4}})\b",  # noqa: E501
+    rf"\b(?:\d{{4}}-\d{{2}}-\d{{2}}|\d{{1,2}}[/.]\d{{1,2}}[/.]\d{{2,4}}|\d{{1,2}}\s+{_MONTHS}\s+\d{{4}}|{_MONTHS}\s+\d{{1,2}},?\s+\d{{4}}|{_MONTHS}\s+\d{{4}}|Q[1-4]\s+\d{{4}})\b",
     re.IGNORECASE,
 )
 MONEY_RE = re.compile(
-    r"(?:(?:USD|EUR|GBP|INR|JPY|CHF|AUD|CAD)\s?|[$€£₹¥])\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|m|bn|million|billion|thousand|lakh|crore))?|\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|INR|dollars|euros|pounds|rupees)",  # noqa: E501
+    r"(?:(?:USD|EUR|GBP|INR|JPY|CHF|AUD|CAD)\s?|[$€£₹¥])\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|m|bn|million|billion|thousand|lakh|crore))?|\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|INR|dollars|euros|pounds|rupees)",
     re.IGNORECASE,
 )
 PERCENT_RE = re.compile(r"\b\d+(?:\.\d+)?\s?%")
@@ -180,7 +176,8 @@ def search_chunks(
     chunks = ctx.all_chunks()
     if not terms or not chunks:
         return []
-    tokenized = [Counter(t.lower() for t in _WORD.findall(c.text)) for c in chunks]
+    tokenized = [Counter(t.lower() for t in _WORD.findall(c.text))
+                 for c in chunks]
     avg_len = sum(sum(t.values()) for t in tokenized) / len(tokenized) or 1
     df = {term: sum(1 for t in tokenized if term in t) for term in set(terms)}
     scored = []
@@ -190,9 +187,11 @@ def search_chunks(
         for term in terms:
             if term not in tf:
                 continue
-            idf = math.log(1 + (len(chunks) - df[term] + 0.5) / (df[term] + 0.5))
+            idf = math.log(
+                1 + (len(chunks) - df[term] + 0.5) / (df[term] + 0.5))
             freq = tf[term]
-            score += idf * freq * 2.2 / (freq + 1.2 * (0.25 + 0.75 * length / avg_len))
+            score += idf * freq * 2.2 / \
+                (freq + 1.2 * (0.25 + 0.75 * length / avg_len))
         if query.lower() in chunk.text.lower():
             score += 2.0
         if score > 0:
@@ -238,7 +237,7 @@ def make_read_source_document(ctx: DocumentContext):
         doc = ctx.source(doc_id)
         max_chars = max(200, min(int(max_chars), 12_000))
         offset = max(0, int(offset))
-        piece = doc.text[offset : offset + max_chars]
+        piece = doc.text[offset: offset + max_chars]
         more = len(doc.text) - (offset + len(piece))
         footer = (
             f"\n[{more} more characters; continue with offset={offset + len(piece)}]"

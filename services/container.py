@@ -8,7 +8,8 @@ from pathlib import Path
 
 from config import AppSettings, load_settings, setup_logging
 from models.agent_models import WorkflowState
-from models.document_models import GenerationRecord, SourceDocument, TemplateStructure
+from models.document_models import (GenerationRecord, SourceDocument,
+                                    TemplateStructure)
 from services.agent_manager import AgentManager
 from services.credential_manager import CredentialManager
 from services.extraction_service import ExtractionService
@@ -20,11 +21,9 @@ from services.mcp_credential_manager import MCPCredentialManager
 from services.mcp_manager import MCPManager
 from services.workflow_service import WorkflowService
 from storage.configuration_store import ConfigurationStore
-from storage.credential_store import (
-    EncryptedFileCredentialStore,
-    LayeredCredentialStore,
-    MemoryCredentialStore,
-)
+from storage.credential_store import (EncryptedFileCredentialStore,
+                                      LayeredCredentialStore,
+                                      MemoryCredentialStore)
 from tools.context import DocumentContext
 from tools.registry import ToolRegistry
 
@@ -63,10 +62,12 @@ class ServiceContainer:
             )
         except Exception as exc:  # noqa: BLE001
             logger.error(
-                "Encrypted credential storage unavailable: %s", type(exc).__name__
+                "Encrypted credential storage unavailable: %s", type(
+                    exc).__name__
             )
             persistent = None
-        self.credential_store = LayeredCredentialStore(session_secrets, persistent)
+        self.credential_store = LayeredCredentialStore(
+            session_secrets, persistent)
         self.credentials = CredentialManager(self.credential_store)
         self.llm = LLMService(
             config_store,
@@ -150,7 +151,8 @@ class ServiceContainer:
         new = AppSettings(**current)
         self.config_store.update(
             "settings",
-            {k: v for k, v in new.model_dump(mode="json").items() if k != "data_dir"},
+            {k: v for k, v in new.model_dump(
+                mode="json").items() if k != "data_dir"},
         )
         self.settings = new
         setup_logging(new.log_level)

@@ -7,7 +7,8 @@ import sys
 
 import pytest
 
-from models.mcp_models import AuthType, ConnectPolicy, MCPServerConfig, TransportType
+from models.mcp_models import (AuthType, ConnectPolicy, MCPServerConfig,
+                               TransportType)
 from services.mcp_client_factory import build_headers
 
 
@@ -35,7 +36,8 @@ def test_config_validation_rules():
             url="https://x",
             headers={"Bad Header": "v"},
         )
-    cfg = MCPServerConfig(id="files", name="Files", command="npx", args=["-y", "srv"])
+    cfg = MCPServerConfig(id="files", name="Files",
+                          command="npx", args=["-y", "srv"])
     assert cfg.qualified_tool_name("read_file") == "files_read_file"
 
 
@@ -63,7 +65,8 @@ def test_headers_built_from_secrets(container):
         "X-Key": "key-123456789",
     }
     bearer = cfg.model_copy(update={"auth_type": AuthType.BEARER})
-    container.mcp_secrets.set("api", "bearer_token", "tok-abcdefgh", persist=False)
+    container.mcp_secrets.set("api", "bearer_token",
+                              "tok-abcdefgh", persist=False)
     assert (
         build_headers(bearer, container.mcp_secrets)["Authorization"]
         == "Bearer tok-abcdefgh"
@@ -74,7 +77,8 @@ def test_stdio_connect_discover_disconnect_reconnect(container, demo_stdio_confi
     mcp = container.mcp
     mcp.save_server(demo_stdio_config, persist=True, is_new=True)
     with pytest.raises(ValueError):
-        mcp.save_server(demo_stdio_config, persist=True, is_new=True)  # duplicate id
+        mcp.save_server(demo_stdio_config, persist=True,
+                        is_new=True)  # duplicate id
     test = mcp.test_server(demo_stdio_config)
     assert test.ok and test.tool_count == 4 and "lookup_company" in test.tool_names
 
@@ -105,14 +109,17 @@ def test_tool_enable_disable_and_persistence(container, demo_stdio_config):
     mcp.set_all_tools_enabled("demo", False)
     assert mcp.available_tools() == {}
     mcp.set_tools_enabled("demo", ["word_count", "current_date"], True)
-    assert sorted(mcp.available_tools()) == ["demo_current_date", "demo_word_count"]
-    saved = json.loads(container.settings.config_file.read_text())["mcp_servers"][0]
+    assert sorted(mcp.available_tools()) == [
+        "demo_current_date", "demo_word_count"]
+    saved = json.loads(container.settings.config_file.read_text())[
+        "mcp_servers"][0]
     assert (
         saved["tool_states"]["word_count"] is True
         and saved["tool_states"]["lookup_company"] is False
     )
     mcp.set_server_enabled("demo", False)
-    assert mcp.state("demo").status == "disabled" and mcp.available_tools() == {}
+    assert mcp.state(
+        "demo").status == "disabled" and mcp.available_tools() == {}
 
 
 def test_test_tool_requires_confirmation_for_destructive(container, demo_stdio_config):
@@ -127,7 +134,8 @@ def test_test_tool_requires_confirmation_for_destructive(container, demo_stdio_c
         "demo", "delete_record", {"record_id": "R-1"}, confirmed=False
     )
     assert blocked.status == "blocked"
-    done = mcp.test_tool("demo", "delete_record", {"record_id": "R-1"}, confirmed=True)
+    done = mcp.test_tool("demo", "delete_record", {
+                         "record_id": "R-1"}, confirmed=True)
     assert done.ok and "deleted" in done.output
 
 
@@ -181,7 +189,8 @@ def test_streamable_http_with_bearer_auth(container, demo_http_server):
         connect_policy=ConnectPolicy.MANUAL,
     )
     assert "A bearer token is required." in mcp.validate(cfg)
-    mcp.secrets.set("web", "bearer_token", demo_http_server["token"], persist=True)
+    mcp.secrets.set("web", "bearer_token",
+                    demo_http_server["token"], persist=True)
     mcp.save_server(cfg, persist=True, is_new=True)
     state = mcp.connect("web")
     assert state.status == "connected" and state.tool_count == 4
@@ -191,7 +200,8 @@ def test_streamable_http_with_bearer_auth(container, demo_http_server):
     assert not mcp.test_tool(
         "web", "current_date", {}, confirmed=False
     ).ok  # server rejects the wrong token
-    assert demo_http_server["token"] not in container.settings.config_file.read_text()
+    assert demo_http_server["token"] not in container.settings.config_file.read_text(
+    )
 
 
 def test_startup_policy_and_restore(container, demo_stdio_config, data_dir):

@@ -23,12 +23,8 @@ from strands.tools.mcp import MCPClient
 
 from config import APP_NAME, APP_VERSION
 from models.mcp_models import AuthType, MCPServerConfig, TransportType
-from services.mcp_credential_manager import (
-    API_KEY,
-    BEARER,
-    OAUTH_SECRET,
-    MCPCredentialManager,
-)
+from services.mcp_credential_manager import (API_KEY, BEARER, OAUTH_SECRET,
+                                             MCPCredentialManager)
 from services.security import PolicyError, validate_stdio_command, validate_url
 
 
@@ -48,11 +44,13 @@ def validate_server_config(
     problems: list[str] = []
     try:
         if cfg.transport == TransportType.STDIO:
-            validate_stdio_command(cfg.command or "", cfg.args, policy.stdio_allowlist)
+            validate_stdio_command(
+                cfg.command or "", cfg.args, policy.stdio_allowlist)
             if cfg.cwd:
                 path = Path(cfg.cwd).expanduser()
                 if not path.is_dir():
-                    problems.append(f"Working directory does not exist: {cfg.cwd}")
+                    problems.append(
+                        f"Working directory does not exist: {cfg.cwd}")
             overlap = set(cfg.env) & set(cfg.secret_env_keys)
             if overlap:
                 problems.append(
