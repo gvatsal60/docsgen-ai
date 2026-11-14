@@ -178,8 +178,7 @@ def build_template(path: Path) -> None:
 
     doc.add_heading("2. Introduction", level=1)
     p = doc.add_paragraph("More information is available on the ")
-    add_hyperlink(p, "https://example.com/about",
-                  ["{{company", "_name}} website"])
+    add_hyperlink(p, "https://example.com/about", ["{{company", "_name}} website"])
     p.add_run(".")
     instruction(
         doc, "Describe the purpose of this document and the organizations involved."

@@ -38,8 +38,7 @@ class ScriptedModel(Model):
 
     def structured_output(self, output_model, prompt, system_prompt=None, **kwargs):
         """Not used: DocsGen agents request structured output when the agent is invoked."""
-        raise NotImplementedError(
-            "Agents use structured_output_model on invocation.")
+        raise NotImplementedError("Agents use structured_output_model on invocation.")
 
     @staticmethod
     def _tool_uses(messages: list) -> list[dict]:
@@ -64,8 +63,7 @@ class ScriptedModel(Model):
             }
         )
         planned = self.tool_calls.get(output_name or "", [])
-        done = [u for u in self._tool_uses(
-            messages) if u.get("name") != output_name]
+        done = [u for u in self._tool_uses(messages) if u.get("name") != output_name]
         yield {"messageStart": {"role": "assistant"}}
         if output_name is None:
             yield {"contentBlockDelta": {"delta": {"text": self.text_reply}}}
@@ -111,6 +109,5 @@ def use_model(container: Any, model: Model) -> Model:
     container.credentials.set_secret(
         "llm/openai", "api_key", "sk-test-0000000000000", persist=False
     )
-    container.llm.apply(ProviderConfig(
-        provider=ProviderId.OPENAI, model_id="scripted"))
+    container.llm.apply(ProviderConfig(provider=ProviderId.OPENAI, model_id="scripted"))
     return model

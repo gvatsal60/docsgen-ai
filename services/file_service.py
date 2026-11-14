@@ -48,20 +48,17 @@ def _check_zip(data: bytes, required: str, kind: str) -> None:
     try:
         zf = zipfile.ZipFile(BytesIO(data))
     except zipfile.BadZipFile as exc:
-        raise UploadRejected(
-            f"The file is not a valid {kind} document.") from exc
+        raise UploadRejected(f"The file is not a valid {kind} document.") from exc
     with zf:
         infos = zf.infolist()
         if len(infos) > MAX_ZIP_ENTRIES:
-            raise UploadRejected(
-                "The document contains too many internal parts.")
+            raise UploadRejected("The document contains too many internal parts.")
         total = 0
         names = set()
         for info in infos:
             name = info.filename
             if name.startswith("/") or ".." in Path(name).parts or "\\" in name:
-                raise UploadRejected(
-                    "The document contains unsafe internal paths.")
+                raise UploadRejected("The document contains unsafe internal paths.")
             total += info.file_size
             if (
                 info.compress_size
@@ -73,8 +70,7 @@ def _check_zip(data: bytes, required: str, kind: str) -> None:
                 )
             names.add(name.lower())
         if total > MAX_ZIP_UNCOMPRESSED:
-            raise UploadRejected(
-                "The document is too large when uncompressed.")
+            raise UploadRejected("The document is too large when uncompressed.")
         if "[content_types].xml" not in names or required not in names:
             raise UploadRejected(f"The file is not a valid {kind} document.")
         if any(n.endswith("vbaproject.bin") for n in names):

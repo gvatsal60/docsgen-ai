@@ -299,8 +299,7 @@ def snapshot(path: Path | str) -> FormattingSnapshot:
                 data = zf.read(name)
                 snap.part_hashes[name] = _hash(data)
                 if "header" in name or "footer" in name:
-                    header_footer_roots.append(
-                        etree.fromstring(data, _SAFE_XML_PARSER))
+                    header_footer_roots.append(etree.fromstring(data, _SAFE_XML_PARSER))
         body = etree.fromstring(zf.read("word/document.xml"), _SAFE_XML_PARSER)
     for root in header_footer_roots:
         snap.drawings += sum(1 for _ in root.iter(qn("w:drawing"), qn("w:pict")))

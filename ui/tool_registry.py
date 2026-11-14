@@ -49,8 +49,7 @@ def render(c: ServiceContainer) -> None:
             ],
         )
         servers = sorted({d.server_id for d in mcp if d.server_id})
-        server = f[2].selectbox(
-            "MCP server", ["Any"] + servers, key="reg_server")
+        server = f[2].selectbox("MCP server", ["Any"] + servers, key="reg_server")
         filtered = c.tools.filter(
             descriptors,
             query=query,
@@ -73,10 +72,8 @@ def render(c: ServiceContainer) -> None:
             key="reg_editor",
             hide_index=True,
             width="stretch",
-            disabled=["Tool", "Type", "Category",
-                      "Needs approval", "Description"],
-            column_config={
-                "Enabled": st.column_config.CheckboxColumn(width="small")},
+            disabled=["Tool", "Type", "Category", "Needs approval", "Description"],
+            column_config={"Enabled": st.column_config.CheckboxColumn(width="small")},
         )
         changed = [
             (d, bool(r["Enabled"]))
@@ -88,8 +85,7 @@ def render(c: ServiceContainer) -> None:
                 if d.source == "builtin":
                     c.tools.set_builtin_enabled([d.name], enabled)
                 elif d.server_id and d.original_name:
-                    c.mcp.set_tools_enabled(
-                        d.server_id, [d.original_name], enabled)
+                    c.mcp.set_tools_enabled(d.server_id, [d.original_name], enabled)
             st.session_state.pop("reg_editor", None)
             st.rerun()
 
@@ -195,8 +191,7 @@ def render(c: ServiceContainer) -> None:
         if st.button("Run", key="reg_test_run"):
             try:
                 args = json.loads(args_text or "{}")
-                output = c.tools.execute_builtin(
-                    name, args, c.document_context())
+                output = c.tools.execute_builtin(name, args, c.document_context())
                 st.code(output[:20000], language="text")
             except Exception as exc:  # noqa: BLE001
                 st.error(sanitize_error(exc))

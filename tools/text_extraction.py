@@ -10,8 +10,12 @@ from pathlib import Path
 
 from strands import tool
 
-from models.document_models import (ExtractedEntities, SourceChunk,
-                                    SourceDocument, SourceRef)
+from models.document_models import (
+    ExtractedEntities,
+    SourceChunk,
+    SourceDocument,
+    SourceRef,
+)
 from services.security import wrap_untrusted
 from tools.context import DocumentContext
 
@@ -176,8 +180,7 @@ def search_chunks(
     chunks = ctx.all_chunks()
     if not terms or not chunks:
         return []
-    tokenized = [Counter(t.lower() for t in _WORD.findall(c.text))
-                 for c in chunks]
+    tokenized = [Counter(t.lower() for t in _WORD.findall(c.text)) for c in chunks]
     avg_len = sum(sum(t.values()) for t in tokenized) / len(tokenized) or 1
     df = {term: sum(1 for t in tokenized if term in t) for term in set(terms)}
     scored = []
@@ -187,11 +190,9 @@ def search_chunks(
         for term in terms:
             if term not in tf:
                 continue
-            idf = math.log(
-                1 + (len(chunks) - df[term] + 0.5) / (df[term] + 0.5))
+            idf = math.log(1 + (len(chunks) - df[term] + 0.5) / (df[term] + 0.5))
             freq = tf[term]
-            score += idf * freq * 2.2 / \
-                (freq + 1.2 * (0.25 + 0.75 * length / avg_len))
+            score += idf * freq * 2.2 / (freq + 1.2 * (0.25 + 0.75 * length / avg_len))
         if query.lower() in chunk.text.lower():
             score += 2.0
         if score > 0:
@@ -237,7 +238,7 @@ def make_read_source_document(ctx: DocumentContext):
         doc = ctx.source(doc_id)
         max_chars = max(200, min(int(max_chars), 12_000))
         offset = max(0, int(offset))
-        piece = doc.text[offset: offset + max_chars]
+        piece = doc.text[offset : offset + max_chars]
         more = len(doc.text) - (offset + len(piece))
         footer = (
             f"\n[{more} more characters; continue with offset={offset + len(piece)}]"

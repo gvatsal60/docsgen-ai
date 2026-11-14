@@ -45,8 +45,7 @@ def resolve_target(
         wanted = _norm(raw)
         best, score = None, 0.0
         for s in structure.sections:
-            ratio = difflib.SequenceMatcher(
-                None, wanted, _norm(s.title)).ratio()
+            ratio = difflib.SequenceMatcher(None, wanted, _norm(s.title)).ratio()
             if ratio > score:
                 best, score = s, ratio
         if best is not None and score >= 0.8:

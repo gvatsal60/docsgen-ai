@@ -53,8 +53,7 @@ def _check_auth(ctx: Context | None) -> None:
     headers = ctx.headers or {}
     auth = headers.get("authorization") or headers.get("Authorization") or ""
     if auth != f"Bearer {_EXPECTED_TOKEN}":
-        raise PermissionError(
-            "Unauthorized: a valid bearer token is required.")
+        raise PermissionError("Unauthorized: a valid bearer token is required.")
 
 
 @server.tool(annotations=ToolAnnotations(read_only_hint=True, open_world_hint=False))

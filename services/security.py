@@ -205,8 +205,7 @@ def validate_stdio_command(command: str, args: list[str], allowlist: list[str]) 
     for suffix in (".exe", ".cmd", ".bat"):
         base = base.removesuffix(suffix)
     if base in _SHELL_NAMES:
-        raise PolicyError(
-            "Shell interpreters cannot be used as MCP server commands.")
+        raise PolicyError("Shell interpreters cannot be used as MCP server commands.")
     allowed = {a.lower() for a in allowlist}
     if base not in allowed and executable.lower() not in allowed:
         raise PolicyError(

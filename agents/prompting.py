@@ -42,8 +42,7 @@ def template_digest(ctx: DocumentContext, max_chars: int = 15_000) -> str:
     if ctx.template is None:
         return "(no template)"
     return wrap_untrusted(
-        f"template {ctx.template.file_name}", ctx.template.outline_text(
-            max_chars)
+        f"template {ctx.template.file_name}", ctx.template.outline_text(max_chars)
     )
 
 

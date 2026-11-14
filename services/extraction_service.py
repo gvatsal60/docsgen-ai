@@ -44,8 +44,7 @@ class ExtractionService:
     def extract(self, stored: StoredFile, existing_ids: set[str]) -> SourceDocument:
         extractor = EXTRACTORS.get(stored.file_type)
         if extractor is None:
-            raise ExtractionError(
-                f"No extractor for .{stored.file_type} files.")
+            raise ExtractionError(f"No extractor for .{stored.file_type} files.")
         doc_id = self.next_doc_id(existing_ids)
         try:
             doc = extractor(
@@ -61,6 +60,5 @@ class ExtractionService:
                 f"Could not read {stored.original_name}: {sanitize_error(exc, 200)}"
             ) from exc
         if not doc.text.strip():
-            doc.warnings.append(
-                "No text could be extracted from this document.")
+            doc.warnings.append("No text could be extracted from this document.")
         return doc

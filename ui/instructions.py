@@ -73,15 +73,13 @@ def render(c: ServiceContainer) -> None:
             targets = st.multiselect(
                 "Sections and placeholders",
                 options,
-                default=[t for t in cfg.get(
-                    "selected_targets", []) if t in options],
+                default=[t for t in cfg.get("selected_targets", []) if t in options],
                 format_func=lambda o: labels.get(o, o),
                 key="instr_targets",
                 help=help_text,
             )
     elif task == TaskType.COMPARE_DOCUMENTS:
-        docx_sources = [d for d in c.session.sources.values()
-                        if d.file_type == "docx"]
+        docx_sources = [d for d in c.session.sources.values() if d.file_type == "docx"]
         if not docx_sources:
             st.warning(
                 "Upload at least one DOCX source document to compare with the template."
@@ -111,8 +109,7 @@ def render(c: ServiceContainer) -> None:
     topics = ""
     if research:
         if research_tools:
-            st.caption("Research tools available: " +
-                       ", ".join(research_tools))
+            st.caption("Research tools available: " + ", ".join(research_tools))
         else:
             st.warning(
                 "No MCP tools are authorized for the Research Agent. Connect a server"
@@ -134,8 +131,7 @@ def render(c: ServiceContainer) -> None:
     for role in AgentRole:
         for d in c.agents.agent_tools(role, ctx):
             if d.requires_approval:
-                consequential.setdefault(d.name, (d, []))[
-                    1].append(AGENT_LABELS[role])
+                consequential.setdefault(d.name, (d, []))[1].append(AGENT_LABELS[role])
     approved: list[str] = []
     if consequential:
         st.warning(
@@ -145,8 +141,7 @@ def render(c: ServiceContainer) -> None:
         approved = st.multiselect(
             "Approve for this run",
             list(consequential),
-            default=[t for t in cfg.get(
-                "approved_tools", []) if t in consequential],
+            default=[t for t in cfg.get("approved_tools", []) if t in consequential],
             format_func=lambda n: f"{n} — used by {', '.join(consequential[n][1])}",
             key="instr_approvals",
         )
@@ -155,8 +150,7 @@ def render(c: ServiceContainer) -> None:
 
     b = st.columns([1, 1, 3])
     save = b[0].button("Save instructions", width="stretch")
-    start = b[1].button("Save & open workflow →",
-                        type="primary", width="stretch")
+    start = b[1].button("Save & open workflow →", type="primary", width="stretch")
     if save or start:
         c.session.instructions = instructions
         c.session.run_config = {

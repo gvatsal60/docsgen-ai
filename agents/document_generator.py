@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 from agents.base import GROUNDING_RULES, AgentSpec
-from agents.prompting import (compact_json, sources_digest, task_block,
-                              template_digest, user_answers_block)
-from models.agent_models import (AgentRole, ExtractionResult, GenerationResult,
-                                 ResearchResult, TaskType, TemplateAnalysis)
+from agents.prompting import (
+    compact_json,
+    sources_digest,
+    task_block,
+    template_digest,
+    user_answers_block,
+)
+from models.agent_models import (
+    AgentRole,
+    ExtractionResult,
+    GenerationResult,
+    ResearchResult,
+    TaskType,
+    TemplateAnalysis,
+)
 from tools.context import DocumentContext
 
 SPEC = AgentSpec(
@@ -58,8 +69,7 @@ def build_prompt(
     if analysis is not None:
         parts += ["TEMPLATE REQUIREMENTS:", compact_json(analysis, 10_000)]
     if extraction is not None:
-        parts += ["EXTRACTED FACTS AND MAPPINGS:",
-                  compact_json(extraction, 20_000)]
+        parts += ["EXTRACTED FACTS AND MAPPINGS:", compact_json(extraction, 20_000)]
     if research is not None and research.performed:
         parts += ["RESEARCH FINDINGS:", compact_json(research, 6_000)]
     if answers:

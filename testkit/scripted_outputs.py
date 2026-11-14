@@ -203,8 +203,7 @@ def generation(messages: list, tool_names: list[str]) -> dict:
             )
         # reference_number intentionally not generated (missing information)
     sections.append(
-        {"target": "s99", "target_type": "section",
-            "content": "hallucinated target"}
+        {"target": "s99", "target_type": "section", "content": "hallucinated target"}
     )
     return {"sections": sections}
 

@@ -9,8 +9,7 @@ import streamlit as st
 from models.provider_models import FieldSpec, ProviderConfig, ProviderId
 from services import model_registry
 from services.container import ServiceContainer
-from services.provider_factory import (ProviderConfigError, _visible,
-                                       validate_config)
+from services.provider_factory import ProviderConfigError, _visible, validate_config
 from ui.components import badge, flash, page_header, show_flashes
 
 
@@ -140,8 +139,7 @@ def render(c: ServiceContainer) -> None:
             ):
                 continue
             settings[field.key] = _setting_widget(
-                field, base.settings.get(
-                    field.key, field.default), f"{pk}_{field.key}"
+                field, base.settings.get(field.key, field.default), f"{pk}_{field.key}"
             )
         for field in spec.secret_fields():
             if field.show_if and not _visible(field.show_if, settings):
@@ -183,8 +181,7 @@ def render(c: ServiceContainer) -> None:
                 c,
                 provider,
                 new_secrets,
-                st.session_state.get(
-                    f"{pk}_persist") == "Encrypted on this machine",
+                st.session_state.get(f"{pk}_persist") == "Encrypted on this machine",
             )
             new_secrets.clear()
             with st.spinner("Listing models…"):
@@ -289,13 +286,11 @@ def render(c: ServiceContainer) -> None:
         test = b1.button(
             "Test connection", key=f"{pk}_test", type="secondary", width="stretch"
         )
-        save = b2.button("Save configuration",
-                         key=f"{pk}_save", width="stretch")
+        save = b2.button("Save configuration", key=f"{pk}_save", width="stretch")
         apply = b3.button(
             "Apply configuration", key=f"{pk}_apply", type="primary", width="stretch"
         )
-        clear = b4.button("Clear credentials",
-                          key=f"{pk}_clear", width="stretch")
+        clear = b4.button("Clear credentials", key=f"{pk}_clear", width="stretch")
 
         if test or save or apply:
             _store_secrets(c, provider, new_secrets, persist)
@@ -347,8 +342,7 @@ def render(c: ServiceContainer) -> None:
             removed = c.credentials.clear_namespace(
                 c.credentials.llm_namespace(provider)
             )
-            flash(
-                f"Removed {removed} stored credential(s) for {spec.label}.", "info")
+            flash(f"Removed {removed} stored credential(s) for {spec.label}.", "info")
             st.rerun()
 
 

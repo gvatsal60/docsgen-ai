@@ -19,17 +19,28 @@ from docx.shared import Emu
 from docx.text.paragraph import Paragraph
 from lxml import etree
 
-from document_engine.formatting_preserver import (NS, element_text,
-                                                  has_drawing, has_page_break,
-                                                  has_section_break,
-                                                  iter_body_blocks,
-                                                  paragraph_text)
-from document_engine.placeholder_manager import (PLACEHOLDER_RE,
-                                                 document_parts,
-                                                 find_placeholders)
-from models.document_models import (HeaderFooterInfo, PageSetup, Placeholder,
-                                    TableInfo, TemplateSection,
-                                    TemplateStructure)
+from document_engine.formatting_preserver import (
+    NS,
+    element_text,
+    has_drawing,
+    has_page_break,
+    has_section_break,
+    iter_body_blocks,
+    paragraph_text,
+)
+from document_engine.placeholder_manager import (
+    PLACEHOLDER_RE,
+    document_parts,
+    find_placeholders,
+)
+from models.document_models import (
+    HeaderFooterInfo,
+    PageSetup,
+    Placeholder,
+    TableInfo,
+    TemplateSection,
+    TemplateStructure,
+)
 
 INSTRUCTION_PATTERNS = [
     re.compile(r"^\s*\[[^\]]{2,}\]\s*$"),
@@ -123,11 +134,9 @@ def build_blocks(doc: DocxDocument) -> list[Block]:
         if el.tag == qn("w:p"):
             para = Paragraph(el, doc._body)
             text = paragraph_text(el)
-            style_name = (
-                para.style.name if para.style is not None else "") or ""
+            style_name = (para.style.name if para.style is not None else "") or ""
             level = _style_heading_level(para) if text.strip() else None
-            structural = has_section_break(
-                el) or has_page_break(el) or has_drawing(el)
+            structural = has_section_break(el) or has_page_break(el) or has_drawing(el)
             blocks.append(
                 Block(
                     index=i,
@@ -143,8 +152,7 @@ def build_blocks(doc: DocxDocument) -> list[Block]:
             )
         else:
             kind = "tbl" if el.tag == qn("w:tbl") else "sdt"
-            blocks.append(Block(index=i, element=el,
-                          kind=kind, text=element_text(el)))
+            blocks.append(Block(index=i, element=el, kind=kind, text=element_text(el)))
     if not any(b.heading_level is not None for b in blocks):
         for b in blocks:
             if b.kind == "p" and _looks_like_fallback_heading(
@@ -168,8 +176,7 @@ def build_sections(blocks: list[Block]) -> list[TemplateSection]:
         section.content_text = "\n".join(texts)[:4000]
         real = [b for b in body if b.text.strip() and not b.instructional]
         section.is_empty = not real
-        section.instructional_blocks = [
-            b.index for b in body if b.instructional]
+        section.instructional_blocks = [b.index for b in body if b.instructional]
         keys: list[str] = []
         for b in body:
             keys += PLACEHOLDER_RE.findall(b.text)
@@ -202,8 +209,7 @@ def analyze_document(
 ) -> tuple[TemplateStructure, list[Block]]:
     blocks = build_blocks(doc)
     sections = build_sections(blocks)
-    section_of_block = {
-        idx: s.section_id for s in sections for idx in s.body_blocks}
+    section_of_block = {idx: s.section_id for s in sections for idx in s.body_blocks}
 
     tables: list[TableInfo] = []
     table_counter = 0
@@ -214,8 +220,7 @@ def analyze_document(
         preview = []
         max_cols = 0
         for tr in rows[:8]:
-            cells = [element_text(tc).strip()[:60]
-                     for tc in tr.findall("w:tc", NS)]
+            cells = [element_text(tc).strip()[:60] for tc in tr.findall("w:tc", NS)]
             max_cols = max(max_cols, len(cells))
             preview.append(cells)
         tables.append(
@@ -223,8 +228,7 @@ def analyze_document(
                 index=table_counter,
                 block=b.index,
                 rows=len(rows),
-                cols=max(max_cols, len(
-                    b.element.findall("w:tblGrid/w:gridCol", NS))),
+                cols=max(max_cols, len(b.element.findall("w:tblGrid/w:gridCol", NS))),
                 preview=preview,
                 section_id=section_of_block.get(b.index),
                 placeholders=sorted(set(PLACEHOLDER_RE.findall(b.text))),

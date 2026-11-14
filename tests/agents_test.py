@@ -46,8 +46,7 @@ def test_structured_output_and_tool_use(container):
             so.OUTPUTS,
             tool_calls={
                 "TemplateAnalysis": [
-                    {"name": "get_template_section",
-                        "input": {"section_id": "s01"}}
+                    {"name": "get_template_section", "input": {"section_id": "s01"}}
                 ]
             },
         ),
@@ -86,8 +85,7 @@ def test_unauthorized_tool_is_blocked(container):
     assert record.tool_calls == []
     assert container.tools.executions[0].status == "blocked"
     # The model is told the tool was refused; the tool itself never ran
-    assert "not authorized" in last_tool_result_text(
-        model.invocations[-1]["messages"])
+    assert "not authorized" in last_tool_result_text(model.invocations[-1]["messages"])
 
 
 def test_mcp_tool_executed_only_when_authorized_and_approved(
@@ -105,8 +103,7 @@ def test_mcp_tool_executed_only_when_authorized_and_approved(
         {"name": "demo_word_count", "input": {"text": "not authorized"}},
     ]
     model = use_model(
-        container, ScriptedModel(so.OUTPUTS, tool_calls={
-                                 "ResearchResult": calls})
+        container, ScriptedModel(so.OUTPUTS, tool_calls={"ResearchResult": calls})
     )
     output, record = container.agents.run(
         role, "Research Northwind.", container.document_context(), approved_tools=set()
@@ -115,8 +112,7 @@ def test_mcp_tool_executed_only_when_authorized_and_approved(
     assert record.tool_calls == [
         "demo_lookup_company"
     ]  # only the authorized, non-consequential call ran
-    statuses = {e.tool: (e.status, e.detail)
-                for e in container.tools.executions}
+    statuses = {e.tool: (e.status, e.detail) for e in container.tools.executions}
     assert statuses["demo_lookup_company"][0] == "success"
     assert statuses["demo_delete_record"] == ("blocked", "approval required")
     msgs = model.invocations[-1]["messages"]
@@ -132,13 +128,11 @@ def test_mcp_tool_executed_only_when_authorized_and_approved(
         '<untrusted_data source="MCP tool demo_lookup_company">'
     )  # ...marked as untrusted data
     assert text.rstrip().endswith("</untrusted_data>")
-    assert any("requires explicit user approval" in str(r)
-               for r in tool_results)
+    assert any("requires explicit user approval" in str(r) for r in tool_results)
 
     # With approval the consequential tool runs
     model2 = use_model(
-        container, ScriptedModel(so.OUTPUTS, tool_calls={
-                                 "ResearchResult": [calls[1]]})
+        container, ScriptedModel(so.OUTPUTS, tool_calls={"ResearchResult": [calls[1]]})
     )
     _, record2 = container.agents.run(
         role,
@@ -153,8 +147,7 @@ def test_mcp_tool_executed_only_when_authorized_and_approved(
 def test_agent_failure_is_reported(container):
     class Broken(ScriptedModel):
         def stream(self, *a, **k):
-            raise RuntimeError(
-                "upstream error with key sk-should-not-leak-123456")
+            raise RuntimeError("upstream error with key sk-should-not-leak-123456")
 
     use_model(container, Broken({}))
     load_template(container)
@@ -162,19 +155,16 @@ def test_agent_failure_is_reported(container):
         container.agents.run(
             AgentRole.DOCUMENT_ANALYZER, "x", container.document_context()
         )
-    assert "sk-should-not-leak" not in str(
-        err.value) and not err.value.record.ok
+    assert "sk-should-not-leak" not in str(err.value) and not err.value.record.ok
 
 
 def test_provider_switch_applies_to_next_agent_run(container):
     first, second = ScriptedModel(so.OUTPUTS), ScriptedModel(so.OUTPUTS)
     use_model(container, first)
     load_template(container)
-    container.agents.run(AgentRole.DOCUMENT_ANALYZER, "x",
-                         container.document_context())
+    container.agents.run(AgentRole.DOCUMENT_ANALYZER, "x", container.document_context())
     use_model(container, second)
-    container.agents.run(AgentRole.DOCUMENT_ANALYZER, "x",
-                         container.document_context())
+    container.agents.run(AgentRole.DOCUMENT_ANALYZER, "x", container.document_context())
     assert len(first.invocations) == 1 and len(second.invocations) == 1
 
 

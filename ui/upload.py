@@ -7,8 +7,11 @@ import streamlit as st
 from document_engine.template_parser import parse_template
 from services.container import ServiceContainer, UploadedTemplate
 from services.extraction_service import ExtractionError
-from services.file_service import (ALLOWED_SOURCE_TYPES,
-                                   ALLOWED_TEMPLATE_TYPES, UploadRejected)
+from services.file_service import (
+    ALLOWED_SOURCE_TYPES,
+    ALLOWED_TEMPLATE_TYPES,
+    UploadRejected,
+)
 from services.security import sanitize_error
 from ui.components import flash, goto_button, page_header, show_flashes
 from ui.document_preview import render_source, render_template_structure
@@ -19,8 +22,7 @@ def _uploader_key(name: str) -> str:
 
 
 def _reset_uploader(name: str) -> None:
-    st.session_state[f"{name}_gen"] = st.session_state.get(
-        f"{name}_gen", 0) + 1
+    st.session_state[f"{name}_gen"] = st.session_state.get(f"{name}_gen", 0) + 1
 
 
 def render_template(c: ServiceContainer) -> None:
@@ -49,8 +51,7 @@ def render_template(c: ServiceContainer) -> None:
         except UploadRejected as exc:
             st.error(str(exc))
         except Exception as exc:  # noqa: BLE001
-            st.error(
-                f"The template could not be analyzed: {sanitize_error(exc)}")
+            st.error(f"The template could not be analyzed: {sanitize_error(exc)}")
         else:
             if current is not None:
                 c.files.delete(current.path)
@@ -115,8 +116,7 @@ def render_sources(c: ServiceContainer) -> None:
                 continue
             data = uploaded.getvalue()
             try:
-                stored = c.files.store(
-                    uploaded.name, data, ALLOWED_SOURCE_TYPES)
+                stored = c.files.store(uploaded.name, data, ALLOWED_SOURCE_TYPES)
                 if any(d.sha256 == stored.sha256 for d in c.session.sources.values()):
                     c.files.delete(stored.path)
                     errors.append(f"{uploaded.name}: already uploaded.")
@@ -150,8 +150,7 @@ def render_sources(c: ServiceContainer) -> None:
     for doc in list(c.session.sources.values()):
         with st.expander(
             f"{doc.doc_id} · {doc.file_name} ({doc.file_type.upper()},"
-            f" {doc.size_bytes / 1024:.0f} KB)" +
-                (" ⚠️" if doc.warnings else "")
+            f" {doc.size_bytes / 1024:.0f} KB)" + (" ⚠️" if doc.warnings else "")
         ):
             render_source(doc)
             if st.button("Remove document", key=f"rm_src_{doc.doc_id}"):

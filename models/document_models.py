@@ -118,11 +118,9 @@ class TemplateStructure(BaseModel):
             )
             lines.append(f"{indent}[{s.section_id}] {s.title} ({flag})")
             if s.content_text:
-                lines.append(
-                    f"{indent}    current text: {s.content_text[:400]}")
+                lines.append(f"{indent}    current text: {s.content_text[:400]}")
             if s.placeholders:
-                lines.append(
-                    f"{indent}    placeholders: {', '.join(s.placeholders)}")
+                lines.append(f"{indent}    placeholders: {', '.join(s.placeholders)}")
         if self.placeholders:
             lines.append(
                 "Placeholders: "

@@ -10,8 +10,7 @@ from tools.registry import BUILTIN_TOOLS
 
 
 def test_builtin_tools_registered_with_default_permissions(container):
-    names = {d.name for d in container.tools.descriptors() if d.source ==
-             "builtin"}
+    names = {d.name for d in container.tools.descriptors() if d.source == "builtin"}
     assert names == {d.name for d in BUILTIN_TOOLS}
     perms = container.tools.permissions()
     assert "get_template_outline" in perms[AgentRole.DOCUMENT_ANALYZER]
@@ -47,8 +46,7 @@ def test_mcp_tool_needs_connection_enable_and_authorization(
     assert "demo_lookup_company" in [
         d.name for d in container.agents.agent_tools(role, ctx)
     ]
-    container.mcp.set_tools_enabled(
-        "demo", ["lookup_company"], False)  # 2. disabled
+    container.mcp.set_tools_enabled("demo", ["lookup_company"], False)  # 2. disabled
     assert "demo_lookup_company" not in [
         d.name for d in container.agents.agent_tools(role, ctx)
     ]
@@ -82,8 +80,7 @@ def test_filters_and_reset(container, demo_stdio_config):
     assert all(
         d.server_id == "demo" for d in container.tools.filter(desc, server_id="demo")
     )
-    container.tools.set_permission(
-        AgentRole.QUALITY_REVIEWER, "demo_word_count", True)
+    container.tools.set_permission(AgentRole.QUALITY_REVIEWER, "demo_word_count", True)
     container.tools.reset_permissions()
     assert (
         "demo_word_count"
@@ -102,8 +99,7 @@ def test_builtin_tool_execution(container):
     )
     assert "D1-C" in hits or "D2-C" in hits
     stats = json.loads(
-        container.tools.execute_builtin(
-            "csv_statistics", {"doc_id": "D2"}, ctx)
+        container.tools.execute_builtin("csv_statistics", {"doc_id": "D2"}, ctx)
     )
     assert stats["Cost (USD)"]["sum"] == 248000
     check = json.loads(

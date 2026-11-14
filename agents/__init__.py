@@ -2,8 +2,14 @@
 
 from typing import Any
 
-from agents import (document_analyzer, document_generator, document_validator,
-                    information_extractor, quality_reviewer, research_agent)
+from agents import (
+    document_analyzer,
+    document_generator,
+    document_validator,
+    information_extractor,
+    quality_reviewer,
+    research_agent,
+)
 from agents.base import AgentSpec
 from models.agent_models import AgentRole
 

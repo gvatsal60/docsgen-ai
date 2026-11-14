@@ -20,20 +20,37 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
-from agents import (document_analyzer, document_generator, document_validator,
-                    information_extractor, quality_reviewer, research_agent)
-from document_engine.document_comparator import (compare_documents,
-                                                 unified_text_diff)
+from agents import (
+    document_analyzer,
+    document_generator,
+    document_validator,
+    information_extractor,
+    quality_reviewer,
+    research_agent,
+)
+from document_engine.document_comparator import compare_documents, unified_text_diff
 from document_engine.document_writer import write_document
-from document_engine.section_mapper import (default_targets, fillable_sections,
-                                            resolve_target, target_label)
-from models.agent_models import (AgentRole, DraftStatus, ExtractionResult,
-                                 GeneratedSection, GenerationResult,
-                                 ResearchResult, SectionDraft, TaskType,
-                                 ValidationIssue, ValidationReport,
-                                 WorkflowStage, WorkflowState)
-from models.document_models import (GenerationRecord, SourceRef,
-                                    TemplateStructure)
+from document_engine.section_mapper import (
+    default_targets,
+    fillable_sections,
+    resolve_target,
+    target_label,
+)
+from models.agent_models import (
+    AgentRole,
+    DraftStatus,
+    ExtractionResult,
+    GeneratedSection,
+    GenerationResult,
+    ResearchResult,
+    SectionDraft,
+    TaskType,
+    ValidationIssue,
+    ValidationReport,
+    WorkflowStage,
+    WorkflowState,
+)
+from models.document_models import GenerationRecord, SourceRef, TemplateStructure
 from services.agent_manager import AgentManager, AgentRunError
 from services.security import sanitize_error
 from tools.context import DocumentContext
@@ -66,8 +83,7 @@ class WorkflowService:
     @staticmethod
     def new_state(task: TaskType, instructions: str, **kwargs) -> WorkflowState:
         return WorkflowState(
-            run_id=datetime.now().strftime("%Y%m%d-%H%M%S-") +
-            uuid.uuid4().hex[:6],
+            run_id=datetime.now().strftime("%Y%m%d-%H%M%S-") + uuid.uuid4().hex[:6],
             task_type=task,
             instructions=instructions,
             **kwargs,
@@ -179,8 +195,7 @@ class WorkflowService:
                 if chunk is not None:
                     valid_ids.append(chunk.chunk_id)
                     ref = chunk.ref.model_copy()
-                    excerpt = _excerpt(
-                        chunk.text, fact.value or fact.statement)
+                    excerpt = _excerpt(chunk.text, fact.value or fact.statement)
                     ref.excerpt = excerpt
                     refs.append(ref)
             fact.source_chunk_ids = valid_ids
@@ -275,8 +290,7 @@ class WorkflowService:
         extra_instruction: str = "",
     ) -> list[str]:
         template, _ = self._require_template(ctx)
-        targets = targets if targets is not None else self.resolve_targets(
-            state, ctx)
+        targets = targets if targets is not None else self.resolve_targets(state, ctx)
         if not targets:
             raise WorkflowError(
                 "There is nothing to generate: no target sections or placeholders were"
@@ -317,8 +331,7 @@ class WorkflowService:
                 f"Generate ({', '.join(batch)})",
                 progress,
             )
-            produced += self._apply_generation(state,
-                                               ctx, result, allowed=set(batch))
+            produced += self._apply_generation(state, ctx, result, allowed=set(batch))
         if state.generation is None:
             state.generation = GenerationResult()
         state.stage = WorkflowStage.GENERATED
@@ -371,11 +384,9 @@ class WorkflowService:
             previous = state.drafts.get(target)
             warnings = []
             if not gen.content.strip():
-                warnings.append(
-                    "The agent could not generate content for this target.")
+                warnings.append("The agent could not generate content for this target.")
             if gen.fact_ids and not sources:
-                warnings.append(
-                    "The cited facts have no valid source references.")
+                warnings.append("The cited facts have no valid source references.")
             draft = SectionDraft(
                 target=target,
                 target_type=target_type,  # type: ignore[arg-type]
@@ -419,8 +430,7 @@ class WorkflowService:
         instruction: str = "",
         progress: Progress = _noop,
     ) -> None:
-        self.generate(state, ctx, [target], progress,
-                      extra_instruction=instruction)
+        self.generate(state, ctx, [target], progress, extra_instruction=instruction)
         draft = state.drafts.get(target)
         if draft:
             draft.status = DraftStatus.PENDING
@@ -566,8 +576,7 @@ class WorkflowService:
             if task == TaskType.VALIDATE_COMPLETENESS:
                 if ctx.sources:
                     self.extract_information(state, ctx, progress)
-                self._drafts_from_existing(
-                    state, ctx, include_placeholders=True)
+                self._drafts_from_existing(state, ctx, include_placeholders=True)
                 self.validate(state, ctx, progress)
                 state.stage = WorkflowStage.COMPLETED
                 return state
@@ -602,8 +611,7 @@ class WorkflowService:
     def summarize(
         self, state: WorkflowState, ctx: DocumentContext, progress: Progress = _noop
     ) -> None:
-        targets = self.resolve_targets(
-            state, ctx) if state.selected_targets else []
+        targets = self.resolve_targets(state, ctx) if state.selected_targets else []
         if targets:
             self.generate(
                 state,
@@ -679,8 +687,7 @@ class WorkflowService:
         self, state: WorkflowState, ctx: DocumentContext, progress: Progress = _noop
     ) -> None:
         _, template_path = self._require_template(ctx)
-        docx_sources = [d for d in ctx.sources.values()
-                        if d.file_type == "docx"]
+        docx_sources = [d for d in ctx.sources.values() if d.file_type == "docx"]
         if state.selected_targets:
             docx_sources = [
                 d for d in docx_sources if d.doc_id in state.selected_targets
@@ -691,8 +698,7 @@ class WorkflowService:
             )
         lines = []
         for doc in docx_sources:
-            progress(
-                "Compare", f"Comparing the template with {doc.file_name}…")
+            progress("Compare", f"Comparing the template with {doc.file_name}…")
             report = compare_documents(template_path, doc.stored_path)
             lines.append(
                 f"## Template vs. {doc.file_name}\nBlocks: {report.original_blocks} →"
@@ -808,8 +814,7 @@ class WorkflowService:
             file_name=file_name,
             docx_path=str(out_path),
             sha256=sha,
-            sections_applied=[
-                d.target for d in approved if d.target_type == "section"],
+            sections_applied=[d.target for d in approved if d.target_type == "section"],
             placeholders_applied=[
                 d.target for d in approved if d.target_type == "placeholder"
             ],
@@ -826,8 +831,7 @@ class WorkflowService:
         json_path = out_dir / f"{stem}_v{version}.json"
         json_path.write_text(self.export_json(state, record), encoding="utf-8")
         report_path = out_dir / f"{stem}_v{version}_report.md"
-        report_path.write_text(self.completion_report(
-            state, record), encoding="utf-8")
+        report_path.write_text(self.completion_report(state, record), encoding="utf-8")
         record.json_path, record.report_path = str(json_path), str(report_path)
         state.stage = WorkflowStage.DOCUMENT_GENERATED
         state.log(
@@ -852,16 +856,13 @@ class WorkflowService:
                 else None
             ),
             "extraction": (
-                state.extraction.model_dump(
-                    mode="json") if state.extraction else None
+                state.extraction.model_dump(mode="json") if state.extraction else None
             ),
             "research": (
-                state.research.model_dump(
-                    mode="json") if state.research else None
+                state.research.model_dump(mode="json") if state.research else None
             ),
             "validation": (
-                state.validation.model_dump(
-                    mode="json") if state.validation else None
+                state.validation.model_dump(mode="json") if state.validation else None
             ),
             "final_validation": (
                 state.final_validation.model_dump(mode="json")
@@ -937,7 +938,7 @@ class WorkflowService:
 
 
 def _batches(items: list[str], size: int) -> list[list[str]]:
-    return [items[i: i + size] for i in range(0, len(items), size)]
+    return [items[i : i + size] for i in range(0, len(items), size)]
 
 
 def _excerpt(text: str, needle: str, width: int = 160) -> str:
@@ -945,5 +946,5 @@ def _excerpt(text: str, needle: str, width: int = 160) -> str:
         idx = text.lower().find(needle.lower()[:40])
         if idx >= 0:
             start = max(0, idx - width // 3)
-            return text[start: start + width].replace("\n", " ").strip()
+            return text[start : start + width].replace("\n", " ").strip()
     return text[:width].replace("\n", " ").strip()

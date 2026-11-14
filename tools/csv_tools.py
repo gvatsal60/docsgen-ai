@@ -61,8 +61,7 @@ def extract_csv(path: Path, doc_id: str, file_name: str, sha256: str) -> SourceD
         chunks=chunks,
         tables=[table],
         entities=extract_entities(text),
-        metadata={"rows": len(rows), "columns": len(
-            columns), "delimiter": sep},
+        metadata={"rows": len(rows), "columns": len(columns), "delimiter": sep},
         warnings=warnings,
     )
 
@@ -86,12 +85,11 @@ def make_get_csv_rows(ctx: DocumentContext):
         table = doc.tables[0]
         rows = table.rows
         if filter_text:
-            rows = [r for r in rows if any(
-                filter_text.lower() in c.lower() for c in r)]
+            rows = [r for r in rows if any(filter_text.lower() in c.lower() for c in r)]
         start, count = max(0, int(start_row)), max(1, min(int(max_rows), 200))
         data = {
             "columns": table.columns,
-            "rows": rows[start: start + count],
+            "rows": rows[start : start + count],
             "matching_rows": len(rows),
         }
         return ctx.limit(

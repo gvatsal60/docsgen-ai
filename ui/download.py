@@ -10,8 +10,7 @@ from models.agent_models import WRITING_TASKS, WorkflowStage
 from models.document_models import GenerationRecord
 from services.container import ServiceContainer
 from services.workflow_service import WorkflowService
-from ui.components import (badge, goto_button, page_header, run_with_status,
-                           show_flashes)
+from ui.components import badge, goto_button, page_header, run_with_status, show_flashes
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
@@ -36,8 +35,7 @@ def render_generation(c: ServiceContainer) -> None:
     state = c.session.workflow
     if state is None:
         st.info("Run the agent workflow first.")
-        goto_button("Open the agent workflow",
-                    "Agent Workflow", key="gen_go_wf")
+        goto_button("Open the agent workflow", "Agent Workflow", key="gen_go_wf")
         return
 
     if state.task_type not in WRITING_TASKS or (
@@ -93,8 +91,7 @@ def render_generation(c: ServiceContainer) -> None:
 
 
 def _record_details(record: GenerationRecord, state) -> None:
-    st.success(
-        f"Generated **{record.file_name}** · {record.validation_summary}")
+    st.success(f"Generated **{record.file_name}** · {record.validation_summary}")
     d = st.columns(3)
     d[0].download_button(
         "⬇️ Download DOCX",
@@ -151,8 +148,7 @@ def _record_details(record: GenerationRecord, state) -> None:
         )
     with t2:
         st.markdown(
-            "**Sections written:** " +
-            (", ".join(wr.sections_written) or "none")
+            "**Sections written:** " + (", ".join(wr.sections_written) or "none")
         )
         st.markdown(
             "**Placeholders replaced:** "

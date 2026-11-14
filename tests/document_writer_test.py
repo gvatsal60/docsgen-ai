@@ -59,8 +59,7 @@ def test_sections_replace_instructions_and_keep_headings(sample_template, tmp_pa
     texts = [p.text for p in doc.paragraphs]
     i = texts.index("1. Executive Summary")
     assert texts[i + 1] == "Executive summary text."
-    assert not any(t.startswith(
-        "[Insert a concise executive summary") for t in texts)
+    assert not any(t.startswith("[Insert a concise executive summary") for t in texts)
     assert "6. Technical Approach" in texts
     assert doc.paragraphs[i].style.name == "Heading 1"
     assert report.sections_written == ["s01", "s06"]
@@ -104,12 +103,10 @@ def test_lists_tables_and_inline_formatting(sample_template, tmp_path):
         ],
     )
     doc = docx.Document(str(out))
-    bullets = [p for p in doc.paragraphs if p.text in (
-        "First key goal", "Second goal")]
+    bullets = [p for p in doc.paragraphs if p.text in ("First key goal", "Second goal")]
     assert bullets and all(p.style.name == "List Bullet" for p in bullets)
     assert any(r.bold and r.text == "key" for r in bullets[0].runs)
-    numbered = [p for p in doc.paragraphs if p.text in (
-        "Step one", "Step two")]
+    numbered = [p for p in doc.paragraphs if p.text in ("Step one", "Step two")]
     assert numbered and all(p.style.name == "List Number" for p in numbered)
     assert len(doc.tables) == 3
     new_table = next(t for t in doc.tables if t.cell(0, 0).text == "Item")
@@ -156,8 +153,7 @@ def test_formatting_preservation_checks(sample_template, tmp_path):
 
 def test_untouched_paragraphs_are_identical(sample_template, tmp_path):
     original = docx.Document(str(sample_template))
-    out, _ = _write(sample_template, tmp_path, [
-                    _draft("s10", "Conclusion text.")])
+    out, _ = _write(sample_template, tmp_path, [_draft("s10", "Conclusion text.")])
     generated = docx.Document(str(out))
     before = {
         p.text: p._p.xml
@@ -184,8 +180,7 @@ def test_reparse_generated_document(sample_template, tmp_path):
     out, _ = _write(
         sample_template,
         tmp_path,
-        [_draft("s01", "Summary."), _draft(
-            "client_name", "Contoso", "placeholder")],
+        [_draft("s01", "Summary."), _draft("client_name", "Contoso", "placeholder")],
     )
     structure = parse_template(out)
     assert "client_name" not in structure.placeholder_keys()

@@ -15,8 +15,13 @@ from pathlib import Path
 import httpx
 
 from config import PROJECT_ROOT
-from models.provider_models import (DiscoveryResult, FieldSpec, ProviderConfig,
-                                    ProviderId, ProviderSpec)
+from models.provider_models import (
+    DiscoveryResult,
+    FieldSpec,
+    ProviderConfig,
+    ProviderId,
+    ProviderSpec,
+)
 from services.security import sanitize_error, validate_url
 
 logger = logging.getLogger(__name__)
@@ -232,8 +237,7 @@ PROVIDER_SPECS: dict[ProviderId, ProviderSpec] = {
                 kind="secret",
                 help="Passed to LiteLLM as api_key.",
             ),
-            FieldSpec(key="api_base",
-                      label="API base URL (optional)", kind="url"),
+            FieldSpec(key="api_base", label="API base URL (optional)", kind="url"),
             FieldSpec(
                 key="api_version",
                 label="API version (optional, e.g. Azure)",
@@ -392,8 +396,7 @@ def discover_models(
 ) -> DiscoveryResult:
     """List models available to the configured account, falling back to the suggestion catalog."""
     try:
-        models = _discover(
-            config, secrets, allow_http_remote=allow_http_remote)
+        models = _discover(config, secrets, allow_http_remote=allow_http_remote)
         if models:
             return DiscoveryResult(models=sorted(set(models)), source="discovered")
         return DiscoveryResult(
@@ -440,18 +443,15 @@ def _discover(
     if p == ProviderId.OPENAI:
         key = secrets.get("api_key")
         if not key:
-            raise PermissionError(
-                "An API key is required for model discovery.")
+            raise PermissionError("An API key is required for model discovery.")
         base = (s.get("base_url") or "https://api.openai.com/v1").rstrip("/")
         validate_url(base, allow_http_remote=allow_http_remote)
-        data = _get_json(f"{base}/models",
-                         headers={"Authorization": f"Bearer {key}"})
+        data = _get_json(f"{base}/models", headers={"Authorization": f"Bearer {key}"})
         return [m["id"] for m in data.get("data", []) if "id" in m]
     if p == ProviderId.ANTHROPIC:
         key = secrets.get("api_key")
         if not key:
-            raise PermissionError(
-                "An API key is required for model discovery.")
+            raise PermissionError("An API key is required for model discovery.")
         data = _get_json(
             "https://api.anthropic.com/v1/models",
             headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
@@ -461,8 +461,7 @@ def _discover(
     if p == ProviderId.GEMINI:
         key = secrets.get("api_key")
         if not key:
-            raise PermissionError(
-                "An API key is required for model discovery.")
+            raise PermissionError("An API key is required for model discovery.")
         data = _get_json(
             "https://generativelanguage.googleapis.com/v1beta/models",
             headers={"x-goog-api-key": key},
@@ -476,8 +475,7 @@ def _discover(
     if p == ProviderId.MISTRAL:
         key = secrets.get("api_key")
         if not key:
-            raise PermissionError(
-                "An API key is required for model discovery.")
+            raise PermissionError("An API key is required for model discovery.")
         data = _get_json(
             "https://api.mistral.ai/v1/models",
             headers={"Authorization": f"Bearer {key}"},
@@ -507,8 +505,7 @@ def _discover(
         session = build_boto_session(config, secrets)
         if session is None:
             raise NotImplementedError  # Bedrock API key mode: no control-plane access
-        client = session.client(
-            "bedrock", region_name=s.get("region") or "us-east-1")
+        client = session.client("bedrock", region_name=s.get("region") or "us-east-1")
         ids = [
             m["modelId"]
             for m in client.list_foundation_models(byOutputModality="TEXT").get(

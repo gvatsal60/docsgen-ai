@@ -5,10 +5,20 @@ from __future__ import annotations
 import json
 
 from agents.base import AgentSpec
-from agents.prompting import (compact_json, task_block, template_digest,
-                              user_answers_block)
-from models.agent_models import (AgentRole, ExtractionResult, SectionDraft,
-                                 TaskType, ValidationIssue, ValidationReport)
+from agents.prompting import (
+    compact_json,
+    task_block,
+    template_digest,
+    user_answers_block,
+)
+from models.agent_models import (
+    AgentRole,
+    ExtractionResult,
+    SectionDraft,
+    TaskType,
+    ValidationIssue,
+    ValidationReport,
+)
 from tools.context import DocumentContext
 
 SPEC = AgentSpec(

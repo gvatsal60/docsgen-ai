@@ -44,8 +44,7 @@ def live(container):
         else {}
     )
     if provider == ProviderId.OLLAMA:
-        settings["host"] = os.environ.get(
-            "OLLAMA_HOST", "http://localhost:11434")
+        settings["host"] = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
     cfg = ProviderConfig(
         provider=provider,
         model_id=MODEL,

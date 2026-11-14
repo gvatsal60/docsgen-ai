@@ -113,8 +113,7 @@ class AppSettings(BaseModel):
 
 
 # Fields that may be changed from the UI (data_dir is fixed per process for safety).
-EDITABLE_SETTINGS = [
-    name for name in AppSettings.model_fields if name != "data_dir"]
+EDITABLE_SETTINGS = [name for name in AppSettings.model_fields if name != "data_dir"]
 
 
 def _from_streamlit_secrets() -> dict[str, Any]:
@@ -151,8 +150,7 @@ def load_settings(overrides: dict[str, Any] | None = None) -> AppSettings:
     values.update(_from_streamlit_secrets())
     values.update(_from_env())
     if overrides:
-        values.update({k: v for k, v in overrides.items()
-                      if k in EDITABLE_SETTINGS})
+        values.update({k: v for k, v in overrides.items() if k in EDITABLE_SETTINGS})
     settings = AppSettings(**values)
     settings.ensure_dirs()
     return settings
@@ -170,8 +168,7 @@ def setup_logging(level: str = "INFO") -> None:
     if not _LOGGING_CONFIGURED:
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s %(levelname)s %(name)s: %(message)s")
+            logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
         )
         root.addHandler(stream_handler)
         _LOGGING_CONFIGURED = True

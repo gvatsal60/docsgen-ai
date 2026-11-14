@@ -15,8 +15,12 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-from models.provider_models import (ConnectionStatus, DiscoveryResult,
-                                    ProviderConfig, ProviderId)
+from models.provider_models import (
+    ConnectionStatus,
+    DiscoveryResult,
+    ProviderConfig,
+    ProviderId,
+)
 from services import model_registry, provider_factory
 from services.credential_manager import CredentialManager
 from services.security import sanitize_error
@@ -65,8 +69,7 @@ class LLMService:
                 self._active = ProviderConfig(**active)
                 self.revision = 1
             except ValueError:
-                logger.warning(
-                    "Saved LLM configuration is invalid and was ignored.")
+                logger.warning("Saved LLM configuration is invalid and was ignored.")
 
     def saved_configs(self) -> dict[str, ProviderConfig]:
         llm = self._store.get("llm", {}) or {}
