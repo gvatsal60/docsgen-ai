@@ -53,7 +53,7 @@ INSTRUCTION_PATTERNS = [
     ),
     re.compile(
         r"\bthis"
-        r" (section|chapter|part)\b.{0,40}\b(should|will|must|shall|provides?|presents?|contains?|describes?|includes?|synthesi[sz]es|proposes)\b",  # noqa: E501
+        r" (section|chapter|part)\b.{0,40}\b(should|will|must|shall|provides?|presents?|contains?|describes?|includes?|synthesi[sz]es|proposes)\b",
         re.IGNORECASE,
     ),
     re.compile(r"lorem ipsum", re.IGNORECASE),
