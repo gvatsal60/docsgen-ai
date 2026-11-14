@@ -7,7 +7,7 @@
 
 boto3>=1.44.0  # Amazon Bedrock
 cryptography>=50.0.0  # first release without known CVEs at time of writing
-httpx>=0.28
+httpx>=0.28.1
 lxml>=6.1.3
 mcp>=2.3.0,<3
 openpyxl>=3.1.5
