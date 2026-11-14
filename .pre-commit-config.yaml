@@ -61,21 +61,6 @@ repos:
     rev: "v3.22.0"
     hooks:
       - id: pyupgrade
-  # Autopep8 for auto-formatting Python code
-  - repo: https://github.com/hhatto/autopep8
-    rev: "v2.3.2"
-    hooks:
-      - id: autopep8
-  # Isort for sorting Python imports
-  - repo: https://github.com/pycqa/isort
-    rev: "10.0.0b2"
-    hooks:
-      - id: isort
-  # Flake8 for linting Python files
-  - repo: https://github.com/pycqa/flake8
-    rev: "7.5.0"
-    hooks:
-      - id: flake8
   # Clang-format for formatting C, C++, and JavaScript files
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: "v23.1.5"
