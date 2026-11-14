@@ -14,8 +14,8 @@ permissions. No code changes or restarts needed.
 
 ```bash
 git clone https://github.com/gvatsal60/docsgen-ai.git && cd docsgen-ai
-python3.11 -m venv venv                # Python 3.11+
-source venv/bin/activate               # Windows: venv\Scripts\activate
+python3 -m venv .venv                  # Python 3.11+
+source .venv/bin/activate              # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python scripts/make_samples.py         # optional: creates sample_data/ to try the workflow
 streamlit run app.py

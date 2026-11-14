@@ -21,13 +21,13 @@ from tools.context import DocumentContext
 
 CHUNK_CHARS = 1_200
 
-_MONTHS = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"  # noqa: E501
+_MONTHS = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
 DATE_RE = re.compile(
-    rf"\b(?:\d{{4}}-\d{{2}}-\d{{2}}|\d{{1,2}}[/.]\d{{1,2}}[/.]\d{{2,4}}|\d{{1,2}}\s+{_MONTHS}\s+\d{{4}}|{_MONTHS}\s+\d{{1,2}},?\s+\d{{4}}|{_MONTHS}\s+\d{{4}}|Q[1-4]\s+\d{{4}})\b",  # noqa: E501
+    rf"\b(?:\d{{4}}-\d{{2}}-\d{{2}}|\d{{1,2}}[/.]\d{{1,2}}[/.]\d{{2,4}}|\d{{1,2}}\s+{_MONTHS}\s+\d{{4}}|{_MONTHS}\s+\d{{1,2}},?\s+\d{{4}}|{_MONTHS}\s+\d{{4}}|Q[1-4]\s+\d{{4}})\b",
     re.IGNORECASE,
 )
 MONEY_RE = re.compile(
-    r"(?:(?:USD|EUR|GBP|INR|JPY|CHF|AUD|CAD)\s?|[$€£₹¥])\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|m|bn|million|billion|thousand|lakh|crore))?|\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|INR|dollars|euros|pounds|rupees)",  # noqa: E501
+    r"(?:(?:USD|EUR|GBP|INR|JPY|CHF|AUD|CAD)\s?|[$€£₹¥])\s?\d[\d,]*(?:\.\d+)?(?:\s?(?:k|m|bn|million|billion|thousand|lakh|crore))?|\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|INR|dollars|euros|pounds|rupees)",
     re.IGNORECASE,
 )
 PERCENT_RE = re.compile(r"\b\d+(?:\.\d+)?\s?%")
