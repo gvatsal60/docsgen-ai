@@ -806,7 +806,7 @@ class WorkflowService:
                 f"Writing the document failed: {sanitize_error(exc)}"
             ) from exc
         comparison = compare_documents(template_path, out_path)
-        sha = __import__("hashlib").sha256(out_path.read_bytes()).hexdigest()
+        sha = self._stable_docx_sha256(out_path)
         record = GenerationRecord(
             version=version,
             run_id=state.run_id,
@@ -935,6 +935,23 @@ class WorkflowService:
                 ),
             ]
         return "\n".join(lines) + "\n"
+
+
+    @staticmethod
+    def _stable_docx_sha256(path: Path) -> str:
+        """Hash document contents while ignoring volatile DOCX metadata timestamps."""
+        import hashlib
+        import zipfile
+
+        digest = hashlib.sha256()
+        with zipfile.ZipFile(path) as archive:
+            for name in sorted(archive.namelist()):
+                if name == "docProps/core.xml":
+                    continue
+                digest.update(name.encode("utf-8"))
+                digest.update(b"\0")
+                digest.update(archive.read(name))
+        return digest.hexdigest()
 
 
 def _batches(items: list[str], size: int) -> list[list[str]]:
