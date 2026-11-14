@@ -57,6 +57,121 @@ files in `sample_data/` as sources.
 
 ## 🗺️ Architecture
 
+DocsGen is a single Streamlit app. A per-session **Service Container** wires three independent managers
+(LLM, MCP, Agent) together with the workflow, extraction, file and document services. The diagram below
+shows how a request flows from the UI through those services to the model providers, MCP servers and local
+state.
+
+```mermaid
+flowchart TB
+    User(["User · Browser"])
+
+    subgraph APP["DocsGen · Streamlit app (app.py)"]
+        UI["UI pages (12)<br/>config · upload · workflow · review · generate"]
+        CTRL["Service Container<br/>per-session wiring"]
+    end
+
+    subgraph MGR["Managers & services"]
+        LLM["LLM Manager<br/>provider · model · credentials"]
+        MCP["MCP Manager<br/>servers · discovery · health"]
+        REG["Tool Registry<br/>permissions · approval guard"]
+        AGM["Agent Manager<br/>builds Strands agents"]
+        WF["Workflow Service<br/>orchestrates the six agents"]
+        EXT["Extraction Service<br/>PDF · DOCX · Excel · CSV · text"]
+        DOC["Document Engine<br/>parse · fill · compare · write"]
+        FILES["File Service<br/>uploads · retention"]
+    end
+
+    subgraph DATA["Local state · .docsgen_data"]
+        CFG[("Configuration")]
+        CRED[("Encrypted credentials")]
+        OUT[("Generated DOCX + reports")]
+    end
+
+    subgraph EXT_SYS["External systems"]
+        PROV["LLM providers<br/>OpenAI · Anthropic · Gemini<br/>Bedrock · Ollama · LiteLLM"]
+        MCPB["MCP servers<br/>stdio · Streamable HTTP · SSE"]
+    end
+
+    User --> UI
+    UI --> CTRL
+    CTRL --> LLM
+    CTRL --> MCP
+    CTRL --> REG
+    CTRL --> AGM
+    CTRL --> WF
+    CTRL --> EXT
+    CTRL --> DOC
+    CTRL --> FILES
+
+    LLM --> PROV
+    MCP --> MCPB
+    REG --> MCP
+
+    LLM --> AGM
+    REG --> AGM
+    AGM --> WF
+    WF --> EXT
+    WF --> DOC
+    WF --> REG
+    EXT --> FILES
+
+    LLM --> CFG
+    MCP --> CFG
+    REG --> CFG
+    LLM -.-> CRED
+    MCP -.-> CRED
+    DOC --> OUT
+    OUT -.-> User
+
+    %% ---- palette ----
+    classDef user fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#0D47A1
+    classDef ui fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D47A1
+    classDef ctrl fill:#64B5F6,stroke:#0D47A1,stroke-width:2px,color:#0D47A1
+    classDef llm fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef mcp fill:#FFE0B2,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef reg fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#B71C1C
+    classDef agm fill:#C5CAE9,stroke:#283593,stroke-width:2px,color:#1A237E
+    classDef wf fill:#D1C4E9,stroke:#4527A0,stroke-width:2px,color:#311B92
+    classDef ext fill:#B2DFDB,stroke:#00695C,stroke-width:2px,color:#004D40
+    classDef doc fill:#B3E5FC,stroke:#01579B,stroke-width:2px,color:#013F6B
+    classDef files fill:#D7CCC8,stroke:#4E342E,stroke-width:2px,color:#3E2723
+    classDef cfg fill:#FFF59D,stroke:#F57F17,stroke-width:2px,color:#E65100
+    classDef cred fill:#FFE082,stroke:#EF6C00,stroke-width:2px,color:#E65100
+    classDef out fill:#FFCC80,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef prov fill:#A5D6A7,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+    classDef mcpb fill:#FFCCBC,stroke:#BF360C,stroke-width:2px,color:#BF360C
+
+    class User user
+    class UI ui
+    class CTRL ctrl
+    class LLM llm
+    class MCP mcp
+    class REG reg
+    class AGM agm
+    class WF wf
+    class EXT ext
+    class DOC doc
+    class FILES files
+    class CFG cfg
+    class CRED cred
+    class OUT out
+    class PROV prov
+    class MCPB mcpb
+
+    style APP fill:#EAF2FB,stroke:#1565C0,stroke-width:2px
+    style MGR fill:#F6F0FC,stroke:#6A1B9A,stroke-width:2px
+    style DATA fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
+    style EXT_SYS fill:#FDECEA,stroke:#C62828,stroke-width:2px
+```
+
+The three managers are independent. The **LLM Manager** owns "which model". The **MCP Manager** owns
+"which external tools exist and are enabled". The **Agent Manager** combines the two at run time and
+only gives each agent the tools it is authorized to use. A change in one (for example, switching
+provider) applies to the next agent run without touching the others.
+
+### Repository layout
+
 ```text
 app.py                        Streamlit entry point + sidebar navigation (12 modules)
 config.py                     Settings (defaults → secrets → DOCSGEN_* env → saved overrides), logging with redaction
