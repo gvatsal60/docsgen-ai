@@ -135,7 +135,7 @@ PROVIDER_SPECS: dict[ProviderId, ProviderSpec] = {
         model_hint=(
             "Use a model ID or inference profile ID, e.g. one listed by discovery."
         ),
-        docs_url="https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/amazon-bedrock/",  # noqa: E501
+        docs_url="https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/amazon-bedrock/",
         fields=[
             FieldSpec(
                 key="auth_mode",

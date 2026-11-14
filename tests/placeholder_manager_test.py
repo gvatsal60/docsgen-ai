@@ -91,7 +91,7 @@ def test_text_box_placeholders(tmp_path):
     run = parse_xml(f"<w:r {nsdecl}><w:t>Box: </w:t></w:r>")
     box = parse_xml(
         "<w:r"
-        f" {nsdecl}><w:pict><w:txbxContent><w:p><w:r><w:t>{{{{boxed}}}}</w:t></w:r></w:p></w:txbxContent></w:pict></w:r>"  # noqa: E501
+        f" {nsdecl}><w:pict><w:txbxContent><w:p><w:r><w:t>{{{{boxed}}}}</w:t></w:r></w:p></w:txbxContent></w:pict></w:r>"
     )
     p._p.append(run)
     p._p.append(box)
