@@ -173,37 +173,133 @@ provider) applies to the next agent run without touching the others.
 ### Repository layout
 
 ```text
-app.py                        Streamlit entry point + sidebar navigation (12 modules)
-config.py                     Settings (defaults → secrets → DOCSGEN_* env → saved overrides), logging with redaction
-ui/                           One module per page; no business logic
-services/
-  container.py                ServiceContainer: wires the managers together per Streamlit session
-  ── LLM Manager ──
-  llm_service.py              Active provider config, test connection, apply, revisions
-  provider_factory.py         Builds Strands model objects per provider
-  model_registry.py           Provider metadata + model catalog (data/model_catalog.json) + discovery
-  credential_manager.py       Provider secrets (session-only or encrypted persistent)
-  ── MCP Manager ──
-  mcp_manager.py              Server CRUD, import/export, facade for the UI
-  mcp_client_factory.py       Builds Strands MCPClient for stdio / Streamable HTTP / SSE
-  mcp_connection_manager.py   Connect, disconnect, health, timeouts
-  mcp_tool_discovery.py       Lists tools, classifies risk (read-only / consequential / destructive)
-  mcp_tool_registry.py        Per-tool enable/disable state
-  mcp_credential_manager.py   MCP headers, tokens, env secrets
-  ── Agent Manager ──
-  agent_manager.py            Creates Strands agents with the current model + authorized tools
-  workflow_service.py         Orchestrates the six agents, structured outputs, cancellation
-  security.py, file_service.py, extraction_service.py
-agents/                       Document Analyzer, Information Extractor, Research Agent,
-                              Document Generator, Document Validator, Quality Reviewer
-tools/                        19 built-in tools (DOCX, PDF, Excel, CSV, text, validation) + ToolRegistry/guard hook
-document_engine/              Template parsing, placeholder handling, section mapping,
-                              formatting-preserving writer, before/after comparator
-storage/                      Encrypted credential store, configuration store, session store
-models/                       Pydantic models
-mcp_servers/demo_server.py    Demo MCP server (stdio, Streamable HTTP, SSE)
-tests/                        Unit, UI (Streamlit AppTest) and live integration tests (*_test.py)
-testkit/                      Test support: scripted Strands model and canned agent outputs
+.
+├── .github
+│   ├── dependabot.yaml
+│   ├── dependabot.yml
+│   └── workflows
+│       ├── bot-pr.yaml
+│       ├── test.yml
+│       └── trivy-scan.yaml
+├── .streamlit
+│   └── config.toml
+├── .env.example
+├── README.md
+├── app.py                  Streamlit entry point + sidebar navigation (12 modules)
+├── config.py               Settings (defaults → secrets → DOCSGEN_* env → saved overrides), logging with redaction
+├── justfile
+├── pyproject.toml
+├── requirements.txt
+├── agents/                 Document Analyzer, Information Extractor, Research Agent,
+│                           Document Generator, Document Validator, Quality Reviewer
+│   ├── __init__.py
+│   ├── base.py
+│   ├── document_analyzer.py
+│   ├── document_generator.py
+│   ├── document_validator.py
+│   ├── information_extractor.py
+│   ├── prompting.py
+│   ├── quality_reviewer.py
+│   └── research_agent.py
+├── data/
+│   └── model_catalog.json  Provider metadata + model catalog + discovery
+├── document_engine/        Template parsing, placeholder handling, section mapping,
+│                           formatting-preserving writer, before/after comparator
+│   ├── __init__.py
+│   ├── document_comparator.py
+│   ├── document_writer.py
+│   ├── formatting_preserver.py
+│   ├── placeholder_manager.py
+│   ├── section_mapper.py
+│   └── template_parser.py
+├── mcp_servers/
+│   └── demo_server.py      Demo MCP server (stdio, Streamable HTTP, SSE)
+├── models/                 Pydantic models
+│   ├── __init__.py
+│   ├── agent_models.py
+│   ├── document_models.py
+│   ├── mcp_models.py
+│   └── provider_models.py
+├── sample_data/            Bundled samples to try the workflow without setup
+│   ├── logo.png
+│   ├── sample_budget.csv
+│   ├── sample_budget.xlsx
+│   ├── sample_company_profile.docx
+│   ├── sample_source.txt
+│   ├── sample_specification.pdf
+│   └── sample_template.docx
+├── scripts/
+│   └── make_samples.py     Optional: creates sample_data/ to try the workflow
+├── services/               Three independent managers + shared services
+│   ├── __init__.py
+│   ├── agent_manager.py     Creates Strands agents with the current model + authorized tools
+│   ├── container.py        ServiceContainer: wires the managers per Streamlit session
+│   ├── credential_manager.py Provider secrets (session-only or encrypted persistent)
+│   ├── extraction_service.py PDF · DOCX · Excel · CSV · text
+│   ├── file_service.py     Uploads · retention
+│   ├── llm_service.py      Active provider config, test connection, apply, revisions
+│   ├── mcp_client_factory.py Builds Strands MCPClient for stdio / Streamable HTTP / SSE
+│   ├── mcp_connection_manager.py Connect, disconnect, health, timeouts
+│   ├── mcp_credential_manager.py MCP headers, tokens, env secrets
+│   ├── mcp_manager.py      Server CRUD, import/export, facade for the UI
+│   ├── mcp_tool_discovery.py Lists tools, classifies risk (read-only / consequential / destructive)
+│   ├── mcp_tool_registry.py Per-tool enable/disable state
+│   ├── model_registry.py   Provider metadata + model catalog + discovery
+│   ├── provider_factory.py Builds Strands model objects per provider
+│   ├── security.py         Tool approval guard, before-tool-call hook
+│   └── workflow_service.py Orchestrates the six agents, structured outputs, cancellation
+├── storage/                Encrypted credential store, configuration store, session store
+│   ├── __init__.py
+│   ├── configuration_store.py
+│   ├── credential_store.py
+│   └── session_store.py
+├── testkit/                Test support: scripted Strands model and canned agent outputs
+│   ├── __init__.py
+│   ├── helpers.py
+│   └── scripted_outputs.py
+├── tests/                  Unit, UI (Streamlit AppTest) and live integration tests (*_test.py)
+│   ├── integration/
+│   │   ├── __init__.py
+│   │   └── live_provider_test.py
+│   ├── __init__.py
+│   ├── agents_test.py
+│   ├── conftest.py
+│   ├── document_writer_test.py
+│   ├── docx_parser_test.py
+│   ├── extraction_test.py
+│   ├── mcp_manager_test.py
+│   ├── mcp_tool_discovery_test.py
+│   ├── placeholder_manager_test.py
+│   ├── provider_factory_test.py
+│   ├── security_test.py
+│   ├── tool_registry_test.py
+│   ├── ui_test.py
+│   └── workflow_test.py
+├── tools/                  19 built-in tools (DOCX, PDF, Excel, CSV, text, validation) + ToolRegistry/guard hook
+│   ├── __init__.py
+│   ├── context.py
+│   ├── csv_tools.py
+│   ├── docx_tools.py
+│   ├── excel_tools.py
+│   ├── pdf_tools.py
+│   ├── registry.py
+│   ├── text_extraction.py
+│   └── validation_tools.py
+└── ui/                     One module per page; no business logic
+    ├── __init__.py
+    ├── ai_configuration.py
+    ├── components.py
+    ├── dashboard.py
+    ├── document_preview.py
+    ├── download.py
+    ├── instructions.py
+    ├── mcp_configuration.py
+    ├── review.py
+    ├── settings.py
+    ├── theme.py
+    ├── tool_registry.py
+    ├── upload.py
+    └── workflow.py
 ```
 
 The three managers are independent. The **LLM Manager** owns "which model". The **MCP Manager** owns
