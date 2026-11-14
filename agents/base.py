@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -20,7 +20,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 @dataclass(frozen=True)
-class AgentSpec(Generic[T]):
+class AgentSpec[T: BaseModel]:
     role: AgentRole
     description: str
     system_prompt: str

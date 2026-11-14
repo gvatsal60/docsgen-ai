@@ -1,0 +1,36 @@
+[project]
+name = "docsgen-ai"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=2.3.0",
+    "openpyxl>=3.1.5",
+    "pdfplumber>=0.11.10",
+    "pymupdf>=2.1",
+    "python-docx>=1.2.0",
+    "strands-agents[anthropic,gemini,litellm,llamaapi,mistral,ollama,openai,writer]>=1.64.0",
+    "streamlit>=1.67.0",
+    "xlrd>=2.0.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider --cov --cov-report=term-missing"
+markers = "live: tests that call a real LLM provider (skipped unless credentials are configured)"
+
+[tool.coverage.run]
+source = ["src"]
+data_file = "coverage/.coverage"
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
