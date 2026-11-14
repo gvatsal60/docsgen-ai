@@ -1,4 +1,9 @@
-# docsgen-ai — AI document automation
+# 📄 DocsGen-AI — AI document automation
+
+[![Tests](https://github.com/gvatsal60/docsgen-ai/actions/workflows/test.yml/badge.svg)](https://github.com/gvatsal60/docsgen-ai/actions/workflows/test.yml)
+![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13%20%7C%203.14-3776AB?logo=python&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-supported-6E56CF)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white)
 
 DocsGen fills **your own Word (.docx) template** with information drawn from uploaded source documents.
 It runs six cooperating [Strands Agents](https://strandsagents.com), can call external tools via the
@@ -10,11 +15,24 @@ permissions. No code changes or restarts needed.
 
 ---
 
-## Quick start
+## ✨ Features
+
+- 📝 **Template-faithful output** — fills your existing `.docx` and preserves styles, fonts, numbering, tables, headers and footers.
+- 📚 **Many source formats** — PDF, DOCX, TXT, MD, CSV, XLSX/XLS.
+- 🤖 **Six cooperating agents** — analyze → extract → research → generate → validate → review.
+- 🔌 **MCP tools** — connect stdio, Streamable HTTP or SSE servers and pick exactly which tools each agent may use.
+- 🖱️ **No-code setup** — provider, credentials, model, MCP servers and permissions are all set in the UI.
+- 🛡️ **Encrypted credentials** — session-only by default, Fernet-encrypted when persisted.
+- ✅ **Human in the loop** — approve, edit or reject every proposed value and section before anything is written.
+- 🧪 **Testable without an LLM** — 112 tests run against a scripted model that implements the real Strands interface.
+
+---
+
+## 🚀 Quick start
 
 ```bash
 git clone https://github.com/gvatsal60/docsgen-ai.git && cd docsgen-ai
-python3 -m venv .venv                  # Python 3.11+
+python3 -m venv .venv                  # Python 3.12+
 source .venv/bin/activate              # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python scripts/make_samples.py         # optional: creates sample_data/ to try the workflow
@@ -37,7 +55,7 @@ files in `sample_data/` as sources.
 
 ---
 
-## Architecture
+## 🗺️ Architecture
 
 ```text
 app.py                        Streamlit entry point + sidebar navigation (12 modules)
@@ -78,7 +96,9 @@ The three managers are independent. The **LLM Manager** owns "which model". The 
 only gives each agent the tools it is authorized to use. A change in one (for example, switching
 provider) applies to the next agent run without touching the others.
 
-### Agent workflow
+---
+
+## 🤖 Agent workflow
 
 | Agent | Role |
 | --- | --- |
@@ -95,7 +115,7 @@ and footers), so the template's look is kept.
 
 ---
 
-## AI providers
+## 🧠 AI providers
 
 | Provider | Auth in the UI | Notes |
 | --- | --- | --- |
@@ -113,7 +133,7 @@ Configuration page. Keys are session-only by default. Turn on "Remember (encrypt
 
 ---
 
-## MCP servers
+## 🔌 MCP servers
 
 Supported transports: **stdio**, **Streamable HTTP**, **SSE**. Supported auth: none, bearer token, API-key
 header, custom headers, and OAuth client credentials (Streamable HTTP only).
@@ -132,7 +152,7 @@ You can also import and export server definitions as JSON, including the common 
 
 ---
 
-## Security model
+## 🛡️ Security model
 
 - **Credentials** are kept in session memory by default. When persisted, they are encrypted with Fernet. The key comes from
   `DOCSGEN_MASTER_KEY`, or is auto-generated in `<data dir>/master.key` with mode 0600.
@@ -153,7 +173,7 @@ You can also import and export server definitions as JSON, including the common 
 
 ---
 
-## Data locations
+## 📁 Data locations
 
 All state is kept in `DOCSGEN_DATA_DIR` (default `./.docsgen_data`, created with mode 0700):
 configuration, encrypted credentials, master key, uploads (removed after the configured retention time), and
@@ -164,13 +184,13 @@ Other settings can be overridden with `DOCSGEN_<SETTING>` environment variables 
 
 ---
 
-## Testing
+## 🧪 Testing
 
 ```bash
 pytest -q
 ```
 
-The suite (109 tests) uses a scripted model that implements the real Strands `Model` interface, so the real
+The suite (112 tests) uses a scripted model that implements the real Strands `Model` interface, so the real
 agents, hooks, structured-output and tool-calling paths all run without an LLM. MCP tests start the real
 demo server over stdio and HTTP. UI tests drive every page with Streamlit `AppTest`.
 
@@ -182,7 +202,7 @@ DOCSGEN_LIVE_PROVIDER=openai DOCSGEN_LIVE_MODEL=gpt-4o-mini OPENAI_API_KEY=... p
 
 ---
 
-## Known limitations
+## ⚠️ Known limitations
 
 - OAuth for MCP supports only the client-credentials flow, and only on Streamable HTTP. Interactive browser OAuth is not implemented.
 - Scanned (image-only) PDFs are not OCR'd. Only the text layer is extracted.
