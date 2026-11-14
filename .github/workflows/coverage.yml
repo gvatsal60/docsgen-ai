@@ -1,9 +1,9 @@
 name: Codecov
 # on:
-  # push:
-  #   branches: ["master", "main"]
-  # pull_request:
-  #   branches: ["*"]
+# push:
+#   branches: ["master", "main"]
+# pull_request:
+#   branches: ["*"]
 permissions:
   contents: read
 jobs:
