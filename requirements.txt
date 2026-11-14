@@ -5,7 +5,7 @@
 # Optional providers - install as needed:
 #   pip install "strands-agents[mistral]"  /  "strands-agents[writer]"  /  "strands-agents[llamaapi]"
 
-boto3>=1.43.0  # Amazon Bedrock
+boto3>=1.44.0  # Amazon Bedrock
 cryptography>=50.0.0  # first release without known CVEs at time of writing
 httpx>=0.28
 lxml>=6.1.0
