@@ -57,6 +57,81 @@ files in `sample_data/` as sources.
 
 ## 🗺️ Architecture
 
+DocsGen is a single Streamlit app. A per-session **Service Container** wires three independent managers
+(LLM, MCP, Agent) together with the workflow, extraction, file and document services. The diagram below
+shows how a request flows from the UI through those services to the model providers, MCP servers and local
+state.
+
+```mermaid
+flowchart TB
+    User(["User · Browser"])
+
+    subgraph APP["DocsGen · Streamlit app (app.py)"]
+        UI["UI pages (12)<br/>config · upload · workflow · review · generate"]
+        CTRL["Service Container<br/>per-session wiring"]
+    end
+
+    subgraph MGR["Managers & services"]
+        LLM["LLM Manager<br/>provider · model · credentials"]
+        MCP["MCP Manager<br/>servers · discovery · health"]
+        REG["Tool Registry<br/>permissions · approval guard"]
+        AGM["Agent Manager<br/>builds Strands agents"]
+        WF["Workflow Service<br/>orchestrates the six agents"]
+        EXT["Extraction Service<br/>PDF · DOCX · Excel · CSV · text"]
+        DOC["Document Engine<br/>parse · fill · compare · write"]
+        FILES["File Service<br/>uploads · retention"]
+    end
+
+    subgraph DATA["Local state · .docsgen_data"]
+        CFG[("Configuration")]
+        CRED[("Encrypted credentials")]
+        OUT[("Generated DOCX + reports")]
+    end
+
+    subgraph EXT_SYS["External systems"]
+        PROV["LLM providers<br/>OpenAI · Anthropic · Gemini<br/>Bedrock · Ollama · LiteLLM"]
+        MCPB["MCP servers<br/>stdio · Streamable HTTP · SSE"]
+    end
+
+    User --> UI
+    UI --> CTRL
+    CTRL --> LLM
+    CTRL --> MCP
+    CTRL --> REG
+    CTRL --> AGM
+    CTRL --> WF
+    CTRL --> EXT
+    CTRL --> DOC
+    CTRL --> FILES
+
+    LLM --> PROV
+    MCP --> MCPB
+    REG --> MCP
+
+    LLM --> AGM
+    REG --> AGM
+    AGM --> WF
+    WF --> EXT
+    WF --> DOC
+    WF --> REG
+    EXT --> FILES
+
+    LLM --> CFG
+    MCP --> CFG
+    REG --> CFG
+    LLM -.-> CRED
+    MCP -.-> CRED
+    DOC --> OUT
+    OUT -.-> User
+```
+
+The three managers are independent. The **LLM Manager** owns "which model". The **MCP Manager** owns
+"which external tools exist and are enabled". The **Agent Manager** combines the two at run time and
+only gives each agent the tools it is authorized to use. A change in one (for example, switching
+provider) applies to the next agent run without touching the others.
+
+### Repository layout
+
 ```text
 app.py                        Streamlit entry point + sidebar navigation (12 modules)
 config.py                     Settings (defaults → secrets → DOCSGEN_* env → saved overrides), logging with redaction
