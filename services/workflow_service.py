@@ -936,7 +936,6 @@ class WorkflowService:
             ]
         return "\n".join(lines) + "\n"
 
-
     @staticmethod
     def _stable_docx_sha256(path: Path) -> str:
         """Hash document contents while ignoring volatile DOCX metadata timestamps."""

@@ -252,32 +252,40 @@ def test_stable_docx_sha256_ignores_core_metadata_volatility(tmp_path):
     mutated = _rewrite_docx_part(
         path,
         "docProps/core.xml",
-        lambda data: data.replace(
-            b"<dc:title>Original title</dc:title>",
-            b"<dc:title>Changed title</dc:title>",
-        )
-        .replace(
-            b"<dc:creator>Original creator</dc:creator>",
-            b"<dc:creator>Changed creator</dc:creator>",
-        )
-        .replace(b"<cp:revision>1</cp:revision>", b"<cp:revision>99</cp:revision>")
-        .replace(b'xmlns:dcterms="http://purl.org/dc/terms/"', b'xmlns:dcterms="http://purl.org/dc/terms/"', 1),
+        lambda data: (
+            data.replace(
+                b"<dc:title>Original title</dc:title>",
+                b"<dc:title>Changed title</dc:title>",
+            )
+            .replace(
+                b"<dc:creator>Original creator</dc:creator>",
+                b"<dc:creator>Changed creator</dc:creator>",
+            )
+            .replace(b"<cp:revision>1</cp:revision>", b"<cp:revision>99</cp:revision>")
+            .replace(
+                b'xmlns:dcterms="http://purl.org/dc/terms/"',
+                b'xmlns:dcterms="http://purl.org/dc/terms/"',
+                1,
+            )
+        ),
     )
     # Inject explicit volatile timestamps/last-modified-by changes.
     mutated = _rewrite_docx_part(
         mutated,
         "docProps/core.xml",
-        lambda data: data.replace(
-            b"<dcterms:created",
-            b'<dcterms:created xsi:type="dcterms:W3CDTF">2001-01-01T00:00:00Z</dcterms:created><dcterms:created_old',
-        )
-        .replace(
-            b"<dcterms:modified",
-            b'<dcterms:modified xsi:type="dcterms:W3CDTF">2099-01-01T00:00:00Z</dcterms:modified><dcterms:modified_old',
-        )
-        .replace(
-            b"</cp:coreProperties>",
-            b"<cp:lastModifiedBy>someone-else</cp:lastModifiedBy></cp:coreProperties>",
+        lambda data: (
+            data.replace(
+                b"<dcterms:created",
+                b'<dcterms:created xsi:type="dcterms:W3CDTF">2001-01-01T00:00:00Z</dcterms:created><dcterms:created_old',
+            )
+            .replace(
+                b"<dcterms:modified",
+                b'<dcterms:modified xsi:type="dcterms:W3CDTF">2099-01-01T00:00:00Z</dcterms:modified><dcterms:modified_old',
+            )
+            .replace(
+                b"</cp:coreProperties>",
+                b"<cp:lastModifiedBy>someone-else</cp:lastModifiedBy></cp:coreProperties>",
+            )
         ),
     )
 
@@ -290,7 +298,9 @@ def test_stable_docx_sha256_detects_document_body_changes(tmp_path):
     a = _doc_with_text(tmp_path, "a.docx", "Alpha")
     b = _doc_with_text(tmp_path, "b.docx", "Beta")
 
-    assert WorkflowService._stable_docx_sha256(a) != WorkflowService._stable_docx_sha256(b)
+    assert WorkflowService._stable_docx_sha256(
+        a
+    ) != WorkflowService._stable_docx_sha256(b)
 
 
 def test_stable_docx_sha256_detects_non_core_package_changes(tmp_path):
@@ -318,8 +328,8 @@ def test_stable_docx_sha256_is_deterministic_across_resaves(tmp_path):
 
 
 def test_stable_docx_sha256_identical_generated_files_match_despite_raw_bytes(tmp_path):
-    from models.agent_models import SectionDraft
     from document_engine.document_writer import write_document
+    from models.agent_models import SectionDraft
 
     template = _doc_with_text(tmp_path, "template.docx", "Hello {{name}}")
     draft = SectionDraft(
@@ -330,6 +340,8 @@ def test_stable_docx_sha256_identical_generated_files_match_despite_raw_bytes(tm
     write_document(template, out1, [draft])
     write_document(template, out2, [draft])
 
-    assert WorkflowService._stable_docx_sha256(out1) == WorkflowService._stable_docx_sha256(out2)
+    assert WorkflowService._stable_docx_sha256(
+        out1
+    ) == WorkflowService._stable_docx_sha256(out2)
     assert docx.Document(str(out1)).paragraphs[0].text == "Hello World"
     assert docx.Document(str(out2)).paragraphs[0].text == "Hello World"
