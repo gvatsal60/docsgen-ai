@@ -184,11 +184,6 @@ provider) applies to the next agent run without touching the others.
 - `sample_data/` and `scripts/make_samples.py` — sample inputs for trying the workflow.
 - `tests/` — unit, UI, and integration tests.
 
-The three managers are independent. The **LLM Manager** owns "which model". The **MCP Manager** owns
-"which external tools exist and are enabled". The **Agent Manager** combines the two at run time and
-only gives each agent the tools it is authorized to use. A change in one (for example, switching
-provider) applies to the next agent run without touching the others.
-
 ---
 
 ## 🤖 Agent workflow
