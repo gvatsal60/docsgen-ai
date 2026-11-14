@@ -123,6 +123,46 @@ flowchart TB
     MCP -.-> CRED
     DOC --> OUT
     OUT -.-> User
+
+    %% ---- palette ----
+    classDef user fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#0D47A1
+    classDef ui fill:#BBDEFB,stroke:#1565C0,stroke-width:2px,color:#0D47A1
+    classDef ctrl fill:#64B5F6,stroke:#0D47A1,stroke-width:2px,color:#0D47A1
+    classDef llm fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef mcp fill:#FFE0B2,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef reg fill:#FFCDD2,stroke:#C62828,stroke-width:2px,color:#B71C1C
+    classDef agm fill:#C5CAE9,stroke:#283593,stroke-width:2px,color:#1A237E
+    classDef wf fill:#D1C4E9,stroke:#4527A0,stroke-width:2px,color:#311B92
+    classDef ext fill:#B2DFDB,stroke:#00695C,stroke-width:2px,color:#004D40
+    classDef doc fill:#B3E5FC,stroke:#01579B,stroke-width:2px,color:#013F6B
+    classDef files fill:#D7CCC8,stroke:#4E342E,stroke-width:2px,color:#3E2723
+    classDef cfg fill:#FFF59D,stroke:#F57F17,stroke-width:2px,color:#E65100
+    classDef cred fill:#FFE082,stroke:#EF6C00,stroke-width:2px,color:#E65100
+    classDef out fill:#FFCC80,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef prov fill:#A5D6A7,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+    classDef mcpb fill:#FFCCBC,stroke:#BF360C,stroke-width:2px,color:#BF360C
+
+    class User user
+    class UI ui
+    class CTRL ctrl
+    class LLM llm
+    class MCP mcp
+    class REG reg
+    class AGM agm
+    class WF wf
+    class EXT ext
+    class DOC doc
+    class FILES files
+    class CFG cfg
+    class CRED cred
+    class OUT out
+    class PROV prov
+    class MCPB mcpb
+
+    style APP fill:#EAF2FB,stroke:#1565C0,stroke-width:2px
+    style MGR fill:#F6F0FC,stroke:#6A1B9A,stroke-width:2px
+    style DATA fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
+    style EXT_SYS fill:#FDECEA,stroke:#C62828,stroke-width:2px
 ```
 
 The three managers are independent. The **LLM Manager** owns "which model". The **MCP Manager** owns
