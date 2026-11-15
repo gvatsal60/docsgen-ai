@@ -10,8 +10,14 @@ import importlib
 import logging
 from typing import Any
 
-from models.provider_models import ProviderConfig, ProviderId
-from services.model_registry import get_spec, install_hint
+from models.provider_models import CustomApiFormat, ProviderConfig, ProviderId
+from services.model_registry import (
+    custom_api_format,
+    custom_endpoint,
+    custom_header_problems,
+    get_spec,
+    install_hint,
+)
 from services.security import validate_url
 
 logger = logging.getLogger(__name__)
@@ -65,6 +71,8 @@ def validate_config(
             problems.append("A profile name is required for profile authentication.")
         if mode == "bedrock_api_key" and not secrets.get("bedrock_api_key"):
             problems.append("A Bedrock API key is required.")
+    if config.provider == ProviderId.CUSTOM:
+        problems.extend(custom_header_problems(settings, secrets))
     return problems
 
 
@@ -77,16 +85,29 @@ def _visible(show_if: dict[str, Any], settings: dict[str, Any]) -> bool:
     return True
 
 
+def model_class_target(config: ProviderConfig) -> tuple[str, str, str]:
+    """Return (Strands module, class name, pip extra) used to build ``config``'s model."""
+    spec = get_spec(config.provider)
+    if (
+        config.provider == ProviderId.CUSTOM
+        and custom_api_format(config.settings) == CustomApiFormat.ANTHROPIC
+    ):
+        return "strands.models.anthropic", "AnthropicModel", "anthropic"
+    return spec.strands_module, spec.strands_class, spec.pip_extra
+
+
 def _load_class(config: ProviderConfig) -> type:
     spec = get_spec(config.provider)
+    module_name, class_name, extra = model_class_target(config)
     try:
-        module = importlib.import_module(spec.strands_module)
+        module = importlib.import_module(module_name)
     except ImportError as exc:
+        hint = f'pip install "strands-agents[{extra}]"' if extra else install_hint(spec)
         raise ProviderDependencyError(
             f"The {spec.label} provider requires an optional dependency. Install it"
-            f" with: {install_hint(spec)}"
+            f" with: {hint}"
         ) from exc
-    return getattr(module, spec.strands_class)
+    return getattr(module, class_name)
 
 
 def build_boto_session(config: ProviderConfig, secrets: dict[str, str]):
@@ -256,5 +277,26 @@ def create_model(
             model_id=config.model_id or "default",
             params=_common_params(config),
         )
+
+    if p == ProviderId.CUSTOM:
+        try:
+            ep = custom_endpoint(config, secrets, allow_http_remote=allow_http_remote)
+        except ValueError as exc:
+            raise ProviderConfigError(str(exc)) from exc
+        client_args = {"api_key": ep.api_key, "base_url": ep.base_url}
+        if ep.headers:
+            client_args["default_headers"] = ep.headers
+        if ep.api_format == CustomApiFormat.ANTHROPIC:
+            params = {}
+            if config.temperature is not None and s.get("send_temperature", True):
+                params["temperature"] = config.temperature
+            return cls(
+                client_args=client_args,
+                model_id=config.model_id,
+                max_tokens=config.max_tokens or 4096,
+                params=params,
+            )
+        params = _common_params(config, s.get("token_param", "max_tokens"))
+        return cls(client_args=client_args, model_id=config.model_id, params=params)
 
     raise ProviderConfigError(f"Unsupported provider: {p}")

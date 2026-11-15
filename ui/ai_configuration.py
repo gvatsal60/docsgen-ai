@@ -57,7 +57,7 @@ def _setting_widget(field: FieldSpec, value: Any, key: str) -> Any:
         value=str(value or ""),
         key=key,
         help=field.help or None,
-        placeholder=str(field.default or ""),
+        placeholder=field.placeholder or str(field.default or ""),
     )
 
 

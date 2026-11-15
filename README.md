@@ -215,6 +215,7 @@ and footers), so the template's look is kept.
 | LiteLLM | Provider-specific key + model string | Gateway to many other providers |
 | Mistral, Writer, Llama API | API key | Install the extra first, e.g. `pip install "strands-agents[mistral]"` |
 | llama.cpp | Server URL | |
+| Custom endpoint | Base URL, optional API key, optional extra auth header | Any OpenAI- or Anthropic-compatible server: vLLM, LM Studio, LocalAI, OpenRouter, Groq, Together, DeepSeek, a company gateway. "Discover models" calls the endpoint's `/models` |
 
 The **Test Connection**, **Save**, **Apply** and **Clear Credentials** buttons are on the AI Provider
 Configuration page. Keys are session-only by default. Turn on "Remember (encrypted)" to persist them.

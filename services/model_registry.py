@@ -10,12 +10,15 @@ from __future__ import annotations
 import importlib.util
 import json
 import logging
+import re
+from dataclasses import dataclass
 from pathlib import Path
 
 import httpx
 
 from config import PROJECT_ROOT
 from models.provider_models import (
+    CustomApiFormat,
     DiscoveryResult,
     FieldSpec,
     ProviderConfig,
@@ -49,6 +52,18 @@ _SEND_TEMPERATURE = FieldSpec(
         " reasoning models)."
     ),
 )
+
+# Placeholder key for endpoints that do not check one (local vLLM, LM Studio, ...). Both SDKs
+# refuse to start without *some* key; this value is not a secret.
+NO_API_KEY = "not-needed"
+_HEADER_NAME_RE = re.compile(r"^[A-Za-z0-9!#$%&'*+.^_`|~-]{1,128}$")  # RFC 9110 token
+_RESERVED_HEADERS = {
+    "host",
+    "content-length",
+    "content-type",
+    "transfer-encoding",
+    "connection",
+}
 
 PROVIDER_SPECS: dict[ProviderId, ProviderSpec] = {
     ProviderId.OPENAI: ProviderSpec(
@@ -319,6 +334,86 @@ PROVIDER_SPECS: dict[ProviderId, ProviderSpec] = {
             )
         ],
     ),
+    ProviderId.CUSTOM: ProviderSpec(
+        id=ProviderId.CUSTOM,
+        label="Custom endpoint (OpenAI- or Anthropic-compatible)",
+        description=(
+            "Any server that speaks the OpenAI Chat Completions or Anthropic Messages"
+            " API: vLLM, LM Studio, LocalAI, OpenRouter, Groq, Together, DeepSeek, a"
+            " company AI gateway, and similar."
+        ),
+        # Default (OpenAI format). The Anthropic format is resolved per configuration in
+        # provider_factory.model_class_target().
+        strands_module="strands.models.openai",
+        strands_class="OpenAIModel",
+        pip_extra="openai",
+        supports_discovery=True,
+        model_hint="The model name your endpoint expects, e.g. meta-llama/Llama-3.1-8B-Instruct",
+        fields=[
+            FieldSpec(
+                key="display_name",
+                label="Name (optional)",
+                kind="text",
+                placeholder="e.g. Local vLLM or Company gateway",
+                help="Shown in the app instead of 'Custom endpoint'.",
+            ),
+            FieldSpec(
+                key="api_format",
+                label="API format",
+                kind="select",
+                options=[f.value for f in CustomApiFormat],
+                default=CustomApiFormat.OPENAI.value,
+                help=(
+                    "openai: OpenAI Chat Completions (most servers and gateways)."
+                    " anthropic: Anthropic Messages API."
+                ),
+            ),
+            FieldSpec(
+                key="base_url",
+                label="Base URL",
+                kind="url",
+                required=True,
+                placeholder="http://localhost:8000/v1",
+                help=(
+                    "openai format: the URL that ends before /chat/completions, usually"
+                    " with /v1 (vLLM http://localhost:8000/v1, LM Studio"
+                    " http://localhost:1234/v1, OpenRouter https://openrouter.ai/api/v1)."
+                    " anthropic format: the URL that ends before /v1/messages. Plain"
+                    " HTTP is only allowed for localhost unless enabled in Application"
+                    " Settings."
+                ),
+            ),
+            FieldSpec(
+                key="header_name",
+                label="Extra auth header name (optional)",
+                kind="text",
+                placeholder="e.g. api-key or X-API-Key",
+                help=(
+                    "For gateways that expect a key in a custom header. Enter its value"
+                    " in 'Extra auth header value' below."
+                ),
+            ),
+            _TOKEN_PARAM.model_copy(
+                update={"show_if": {"api_format": CustomApiFormat.OPENAI.value}}
+            ),
+            _SEND_TEMPERATURE,
+            FieldSpec(
+                key="api_key",
+                label="API key (optional)",
+                kind="secret",
+                help=(
+                    "Sent as 'Authorization: Bearer' (openai) or 'x-api-key'"
+                    " (anthropic). Leave empty for local servers that do not check keys."
+                ),
+            ),
+            FieldSpec(
+                key="header_value",
+                label="Extra auth header value",
+                kind="secret",
+                help="Value for the extra auth header named above.",
+            ),
+        ],
+    ),
 }
 
 
@@ -351,6 +446,7 @@ _SDK_MODULES = {
     ProviderId.WRITER: "writerai",
     ProviderId.LLAMAAPI: "llama_api_client",
     ProviderId.LLAMACPP: "httpx",
+    ProviderId.CUSTOM: "openai",  # default format; the anthropic format is checked on use
 }
 
 
@@ -370,6 +466,71 @@ def install_hint(spec: ProviderSpec) -> str:
         f'pip install "strands-agents[{extra}]"'
         if extra
         else "pip install strands-agents boto3"
+    )
+
+
+# ---------------------------------------------------------------------------- Custom endpoint
+@dataclass(frozen=True)
+class CustomEndpoint:
+    """Resolved connection details for a custom (OpenAI- or Anthropic-compatible) endpoint."""
+
+    api_format: CustomApiFormat
+    base_url: str
+    api_key: str  # NO_API_KEY when the user left it empty
+    headers: dict[str, str]
+
+
+def custom_api_format(settings: dict) -> CustomApiFormat:
+    try:
+        return CustomApiFormat(settings.get("api_format") or CustomApiFormat.OPENAI)
+    except ValueError:
+        return CustomApiFormat.OPENAI
+
+
+def custom_header_problems(settings: dict, secrets: dict[str, str]) -> list[str]:
+    """Validation problems for the optional extra auth header (empty when valid)."""
+    name = (settings.get("header_name") or "").strip()
+    value = secrets.get("header_value") or ""
+    if not name and not value:
+        return []
+    if not name:
+        return ["Enter the extra auth header name, or clear its value."]
+    if not value:
+        return [f"Enter a value for the '{name}' header, or clear its name."]
+    problems = []
+    if not _HEADER_NAME_RE.match(name):
+        problems.append(
+            "Extra auth header name may only contain letters, digits and - _ . characters."
+        )
+    elif name.lower() in _RESERVED_HEADERS:
+        problems.append(
+            f"The '{name}' header is managed by the client and cannot be set."
+        )
+    if "\r" in value or "\n" in value:
+        problems.append("Extra auth header value must be a single line.")
+    return problems
+
+
+def custom_endpoint(
+    config: ProviderConfig, secrets: dict[str, str], *, allow_http_remote: bool = False
+) -> CustomEndpoint:
+    """Validate and resolve a custom endpoint configuration. Raises ValueError when invalid."""
+    s = config.settings
+    base = (s.get("base_url") or "").strip()
+    if not base:
+        raise ValueError("A base URL is required for a custom endpoint.")
+    base = validate_url(base, allow_http_remote=allow_http_remote).rstrip("/")
+    problems = custom_header_problems(s, secrets)
+    if problems:
+        raise ValueError(" ".join(problems))
+    headers = {}
+    if s.get("header_name"):
+        headers[s["header_name"].strip()] = secrets["header_value"]
+    return CustomEndpoint(
+        api_format=custom_api_format(s),
+        base_url=base,
+        api_key=secrets.get("api_key") or NO_API_KEY,
+        headers=headers,
     )
 
 
@@ -498,6 +659,16 @@ def _discover(
             allow_http_remote=allow_http_remote,
         ).rstrip("/")
         data = _get_json(f"{base}/v1/models")
+        return [m["id"] for m in data.get("data", []) if "id" in m]
+    if p == ProviderId.CUSTOM:
+        ep = custom_endpoint(config, secrets, allow_http_remote=allow_http_remote)
+        if ep.api_format == CustomApiFormat.ANTHROPIC:
+            url = f"{ep.base_url}/v1/models"
+            auth = {"x-api-key": ep.api_key, "anthropic-version": "2023-06-01"}
+        else:
+            url = f"{ep.base_url}/models"
+            auth = {"Authorization": f"Bearer {ep.api_key}"}
+        data = _get_json(url, headers={**auth, **ep.headers})
         return [m["id"] for m in data.get("data", []) if "id" in m]
     if p == ProviderId.BEDROCK:
         from services.provider_factory import build_boto_session
