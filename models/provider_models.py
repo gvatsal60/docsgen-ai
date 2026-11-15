@@ -20,6 +20,16 @@ class ProviderId(str, Enum):
     WRITER = "writer"
     LLAMAAPI = "llamaapi"
     LLAMACPP = "llamacpp"
+    CUSTOM = "custom"  # any OpenAI- or Anthropic-compatible endpoint
+
+
+class CustomApiFormat(str, Enum):
+    """Wire protocol spoken by a custom endpoint."""
+
+    # OpenAI Chat Completions: vLLM, LM Studio, OpenRouter, Groq, most gateways
+    OPENAI = "openai"
+    # Anthropic Messages API
+    ANTHROPIC = "anthropic"
 
 
 FieldKind = Literal["secret", "text", "url", "select", "number", "bool"]
@@ -34,6 +44,7 @@ class FieldSpec(BaseModel):
     required: bool = False
     help: str = ""
     default: Any = None
+    placeholder: str = ""  # example shown in an empty input (never used as a value)
     options: list[str] = Field(default_factory=list)
     env_var: str | None = None  # optional environment fallback for secrets
     show_if: dict[str, Any] | None = None  # e.g. {"auth_mode": "access_keys"}

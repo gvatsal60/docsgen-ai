@@ -135,7 +135,11 @@ class LLMService:
         if not self._active:
             return "Not configured"
         spec = model_registry.get_spec(self._active.provider)
-        return f"{spec.label} · {self._active.model_id}"
+        label = spec.label
+        if self._active.provider == ProviderId.CUSTOM:
+            name = str(self._active.settings.get("display_name") or "").strip()
+            label = f"{name} (custom)" if name else "Custom endpoint"
+        return f"{label} · {self._active.model_id}"
 
     # ------------------------------------------------------------------ models
     def _secrets_for(self, config: ProviderConfig) -> dict[str, str]:
