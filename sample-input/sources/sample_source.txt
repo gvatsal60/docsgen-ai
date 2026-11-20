@@ -1,0 +1,34 @@
+PROJECT PROPOSAL NOTES — Northwind Analytics Ltd.
+Prepared by: Priya Raman, Head of Delivery
+Client: Contoso Retail Group
+Project: Unified Customer Data Platform
+Reference: NWA-2026-014
+Date of proposal: 15 March 2026
+
+Background
+Contoso Retail Group operates 42 stores and an online shop. Customer data is spread across a point-of-sale
+system, an e-commerce platform and a loyalty application. Discovery workshops in January 2026 found that
+marketing campaigns take 3 weeks to prepare because data must be merged manually.
+
+Objectives
+- Consolidate customer data from the three systems into a single platform.
+- Reduce campaign preparation time from 3 weeks to 2 days.
+- Achieve a data quality score of at least 95% for customer records.
+
+Scope of work
+Northwind Analytics will design and implement data pipelines, a customer data model, a reporting layer and
+staff training. Hardware procurement and changes to the point-of-sale software are out of scope.
+
+Technical approach
+The platform will run on Amazon Web Services using managed services: Amazon S3 for storage, AWS Glue for
+data pipelines and Amazon Redshift for analytics. Data will be encrypted at rest and in transit.
+
+Timeline
+Phase 1 Discovery: April 2026. Phase 2 Build: May to July 2026. Phase 3 Rollout and training: August 2026.
+
+Risks
+Data quality in the legacy loyalty system is unknown. Mitigation: profile the data in Phase 1.
+Staff availability during the summer may delay training. Mitigation: schedule training sessions early.
+
+Budget
+The total budget is USD 248,000 (see the budget spreadsheet for the breakdown).
