@@ -220,3 +220,128 @@ def test_missing_inputs_fail_gracefully(container):
     with pytest.raises(WorkflowError, match="source document"):
         container.workflow.run_pipeline(state, container.document_context())
     assert state.template_analysis is not None  # earlier step results are kept
+
+
+def _rewrite_docx_part(path: Path, part_name: str, mutate) -> Path:
+    import zipfile
+
+    out = path.with_name(path.stem + "_mutated" + path.suffix)
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(out, "w") as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == part_name:
+                data = mutate(data)
+            zout.writestr(item, data)
+    return out
+
+
+def _doc_with_text(tmp_path: Path, name: str, text: str) -> Path:
+    path = tmp_path / name
+    document = docx.Document()
+    document.add_paragraph(text)
+    document.core_properties.title = "Original title"
+    document.core_properties.creator = "Original creator"
+    document.save(path)
+    return path
+
+
+def test_stable_docx_sha256_ignores_core_metadata_volatility(tmp_path):
+    path = _doc_with_text(tmp_path, "base.docx", "Stable content")
+    baseline = WorkflowService._stable_docx_sha256(path)
+
+    mutated = _rewrite_docx_part(
+        path,
+        "docProps/core.xml",
+        lambda data: (
+            data.replace(
+                b"<dc:title>Original title</dc:title>",
+                b"<dc:title>Changed title</dc:title>",
+            )
+            .replace(
+                b"<dc:creator>Original creator</dc:creator>",
+                b"<dc:creator>Changed creator</dc:creator>",
+            )
+            .replace(b"<cp:revision>1</cp:revision>", b"<cp:revision>99</cp:revision>")
+            .replace(
+                b'xmlns:dcterms="http://purl.org/dc/terms/"',
+                b'xmlns:dcterms="http://purl.org/dc/terms/"',
+                1,
+            )
+        ),
+    )
+    # Inject explicit volatile timestamps/last-modified-by changes.
+    mutated = _rewrite_docx_part(
+        mutated,
+        "docProps/core.xml",
+        lambda data: (
+            data.replace(
+                b"<dcterms:created",
+                b'<dcterms:created xsi:type="dcterms:W3CDTF">2001-01-01T00:00:00Z</dcterms:created><dcterms:created_old',
+            )
+            .replace(
+                b"<dcterms:modified",
+                b'<dcterms:modified xsi:type="dcterms:W3CDTF">2099-01-01T00:00:00Z</dcterms:modified><dcterms:modified_old',
+            )
+            .replace(
+                b"</cp:coreProperties>",
+                b"<cp:lastModifiedBy>someone-else</cp:lastModifiedBy></cp:coreProperties>",
+            )
+        ),
+    )
+
+    assert WorkflowService._stable_docx_sha256(path) == baseline
+    assert WorkflowService._stable_docx_sha256(mutated) == baseline
+    assert path.read_bytes() != mutated.read_bytes()
+
+
+def test_stable_docx_sha256_detects_document_body_changes(tmp_path):
+    a = _doc_with_text(tmp_path, "a.docx", "Alpha")
+    b = _doc_with_text(tmp_path, "b.docx", "Beta")
+
+    assert WorkflowService._stable_docx_sha256(
+        a
+    ) != WorkflowService._stable_docx_sha256(b)
+
+
+def test_stable_docx_sha256_detects_non_core_package_changes(tmp_path):
+    path = _doc_with_text(tmp_path, "base.docx", "Same body")
+    baseline = WorkflowService._stable_docx_sha256(path)
+
+    mutated = _rewrite_docx_part(
+        path,
+        "word/styles.xml",
+        lambda data: data + b"\n<!-- stable-hash test marker -->",
+    )
+
+    assert WorkflowService._stable_docx_sha256(mutated) != baseline
+
+
+def test_stable_docx_sha256_is_deterministic_across_resaves(tmp_path):
+    path = _doc_with_text(tmp_path, "base.docx", "Deterministic content")
+    baseline = WorkflowService._stable_docx_sha256(path)
+    document = docx.Document(str(path))
+    document.save(path)
+    document = docx.Document(str(path))
+    document.save(path)
+
+    assert WorkflowService._stable_docx_sha256(path) == baseline
+
+
+def test_stable_docx_sha256_identical_generated_files_match_despite_raw_bytes(tmp_path):
+    from document_engine.document_writer import write_document
+    from models.agent_models import SectionDraft
+
+    template = _doc_with_text(tmp_path, "template.docx", "Hello {{name}}")
+    draft = SectionDraft(
+        target="name", target_type="placeholder", title="name", content="World"
+    )
+    out1 = tmp_path / "out1.docx"
+    out2 = tmp_path / "out2.docx"
+    write_document(template, out1, [draft])
+    write_document(template, out2, [draft])
+
+    assert WorkflowService._stable_docx_sha256(
+        out1
+    ) == WorkflowService._stable_docx_sha256(out2)
+    assert docx.Document(str(out1)).paragraphs[0].text == "Hello World"
+    assert docx.Document(str(out2)).paragraphs[0].text == "Hello World"
